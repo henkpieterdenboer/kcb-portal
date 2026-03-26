@@ -142,6 +142,20 @@ export default function ShipmentDetailPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">{t("detail.inspection")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1 text-sm">
+            <div><span className="text-gray-500">{t("detail.date")}</span>{" "}
+              {shipment.inspectiedatum
+                ? new Date(shipment.inspectiedatum).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })
+                : "-"}
+            </div>
+            <div><span className="text-gray-500">{t("detail.location")}</span> {shipment.inspectielocatie ? shipment.inspectielocatie.substring(0, 40) : "-"}</div>
+            <div><span className="text-gray-500">{t("detail.reference")}</span> {shipment.referentie || "-"}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">{t("detail.transport")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1 text-sm">
@@ -158,16 +172,6 @@ export default function ShipmentDetailPage() {
             <div><span className="text-gray-500">{t("detail.declarant")}</span> {shipment.aangever || "-"}</div>
             <div><span className="text-gray-500">{t("detail.relation")}</span> {shipment.relatienaam || "-"}</div>
             <div><span className="text-gray-500">{t("detail.importer")}</span> {shipment.importeur || "-"}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">{t("detail.inspection")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1 text-sm">
-            <div><span className="text-gray-500">{t("detail.reference")}</span> {shipment.referentie || "-"}</div>
-            <div><span className="text-gray-500">{t("detail.location")}</span> {shipment.inspectielocatie ? shipment.inspectielocatie.substring(0, 40) : "-"}</div>
-            <div><span className="text-gray-500">{t("detail.date")}</span> {shipment.inspectiedatum ? new Date(shipment.inspectiedatum).toLocaleDateString("nl-NL") : "-"}</div>
           </CardContent>
         </Card>
       </div>
