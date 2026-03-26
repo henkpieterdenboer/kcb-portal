@@ -163,7 +163,7 @@ export default function ShipmentDetailPage() {
                 )}
                 <div><span className="text-gray-500">{dateLabel}</span>{" "}
                   {shipment.inspectiedatum
-                    ? new Date(shipment.inspectiedatum).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })
+                    ? new Date(shipment.inspectiedatum).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short", timeZone: "UTC" })
                     : "-"}
                 </div>
                 <div><span className="text-gray-500">{t("detail.location")}</span> {shipment.inspectielocatie ? shipment.inspectielocatie.substring(0, 40) : "-"}</div>
@@ -253,7 +253,7 @@ export default function ShipmentDetailPage() {
                     <div className="font-mono text-sm font-medium">{report.rapportnummer}</div>
                     <div className="text-sm text-gray-500">
                       {report.rapportdatum
-                        ? new Date(report.rapportdatum).toLocaleDateString("nl-NL")
+                        ? new Date(report.rapportdatum).toLocaleDateString("nl-NL", { timeZone: "UTC" })
                         : "-"}{" "}
                       {report.inspecteur && `- ${report.inspecteur}`}
                     </div>
