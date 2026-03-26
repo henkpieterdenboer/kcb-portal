@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("USER")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Shipment {
+  id                 String    @id @default(uuid())
+  aangiftenummer     String    @unique
+  aangever           String?
+  relatienummer      String?
+  relatienaam        String?
+  referentie         String?
+  exporteur          String?
+  importeur          String?
+  awb                String?
+  bol                String?
+  containerNrs       String?   @map("container_nrs")
+  landVanVerzending  String?   @map("land_van_verzending")
+  landVanOorsprong   String?   @map("land_van_oorsprong")
+  transportNaarEU    String?   @map("transport_naar_eu")
+  transportBinnenEU  String?   @map("transport_binnen_eu")
+  inspectiedatum     DateTime? @map("inspectiedatum")
+  inspectielocatie   String?   @map("inspectielocatie")
+  verwachteAankomst  DateTime? @map("verwachte_aankomst")
+  status             String    @default("DOCUMENTCONTROLE")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  subShipments      SubShipment[]
+  inspectionReports InspectionReport[]
+  sampleReports     SampleReport[]
+  blockadeReports   BlockadeReport[]
+  statusHistory     StatusHistory[]
+  emailIngestionId  String?          @map("email_ingestion_id")
+  emailIngestion    EmailIngestion?  @relation(fields: [emailIngestionId], references: [id])
+
+  @@map("shipments")
+}
+
+model SubShipment {
+  id               String   @id @default(uuid())
+  shipmentId       String   @map("shipment_id")
+  botanischeNaam   String   @map("botanische_naam")
+  landVanOorsprong String?  @map("land_van_oorsprong")
+  aantalColli      Int?     @map("aantal_colli")
+  soortColli       String?  @map("soort_colli")
+  aantalStuks      Int?     @map("aantal_stuks")
+  taricCode        String?  @map("taric_code")
+  bescheiden       String?
+  monsterVerplicht Boolean? @map("monster_verplicht")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  @@map("sub_shipments")
+}
+
+model InspectionReport {
+  id                String    @id @default(uuid())
+  rapportnummer     String    @unique
+  registratienummer String?
+  rapportdatum      DateTime? @map("rapport_datum")
+  soortInspectie    String?   @map("soort_inspectie")
+  bezoeknummer      String?
+  aanvraagnummer    String?
+  aanvrager         String?
+  aangever          String?
+  afzender          String?
+  awbNummer         String?   @map("awb_nummer")
+  bolNummer         String?   @map("bol_nummer")
+  landVanVertrek    String?   @map("land_van_vertrek")
+  referentie        String?
+  inspectiedatum    DateTime? @map("inspectiedatum")
+  tijdAanvang       String?   @map("tijd_aanvang")
+  tijdEinde         String?   @map("tijd_einde")
+  inspectieMinuten  Int?      @map("inspectie_minuten")
+  inspecteur        String?
+  locatieNaam       String?   @map("locatie_naam")
+  locatieAdres      String?   @map("locatie_adres")
+  resultaten        String?
+  shipmentId        String?   @map("shipment_id")
+  shipment          Shipment? @relation(fields: [shipmentId], references: [id])
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  @@map("inspection_reports")
+}
+
+model SampleReport {
+  id                String    @id @default(uuid())
+  dossiernummer     String    @unique
+  registratienummer String?
+  aanvraagnummer    String?
+  soortInspectie    String?   @map("soort_inspectie")
+  inspecteur        String?
+  bedrijfsnaam      String?
+  adres             String?
+  product           String?
+  hoeveelheid       String?
+  colli             String?
+  landVanOorsprong  String?   @map("land_van_oorsprong")
+  monsternummer     String?
+  datumMonstername  DateTime? @map("datum_monstername")
+  plaatsMonstername String?   @map("plaats_monstername")
+  soortMonster      String?   @map("soort_monster")
+  typeMonster       String?   @map("type_monster")
+  vermoedenOorzaak  String?   @map("vermoeden_oorzaak")
+  opmerking         String?
+  diagnose          String?
+  shipmentId        String?   @map("shipment_id")
+  shipment          Shipment? @relation(fields: [shipmentId], references: [id])
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  @@map("sample_reports")
+}
+
+model BlockadeReport {
+  id                    String    @id @default(uuid())
+  dossiernummer         String    @unique
+  registratienummer     String?
+  aangiftenummer        String?
+  nummerFytoCertificaat String?   @map("nummer_fyto_certificaat")
+  landVanAfgifte        String?   @map("land_van_afgifte")
+  referentie            String?
+  inspectiedatum        DateTime? @map("inspectiedatum")
+  soortInspectie        String?   @map("soort_inspectie")
+  locatieNaam           String?   @map("locatie_naam")
+  locatieAdres          String?   @map("locatie_adres")
+  inspecteur            String?
+  reden                 String?
+  varieteit             String?   @map("varieteit")
+  monsternummer         String?
+  afhandeling           String?
+  shipmentId            String?   @map("shipment_id")
+  shipment              Shipment? @relation(fields: [shipmentId], references: [id])
+  createdAt             DateTime  @default(now()) @map("created_at")
+
+  @@map("blockade_reports")
+}
+
+model StatusHistory {
+  id         String   @id @default(uuid())
+  shipmentId String   @map("shipment_id")
+  status     String
+  source     String?
+  details    String?
+  timestamp  DateTime @default(now())
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  @@map("status_history")
+}
+
+model EmailIngestion {
+  id              String    @id @default(uuid())
+  subject         String?
+  fromAddress     String?   @map("from_address")
+  receivedAt      DateTime? @map("received_at")
+  processedAt     DateTime  @default(now()) @map("processed_at")
+  attachmentCount Int       @default(0) @map("attachment_count")
+  status          String    @default("PROCESSED")
+  errors          String?
+  shipments       Shipment[]
+
+  @@map("email_ingestions")
+}
