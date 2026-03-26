@@ -140,20 +140,38 @@ export default function ShipmentDetailPage() {
 
       {/* Key Info */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">{t("detail.inspection")}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1 text-sm">
-            <div><span className="text-gray-500">{t("detail.date")}</span>{" "}
-              {shipment.inspectiedatum
-                ? new Date(shipment.inspectiedatum).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })
-                : "-"}
-            </div>
-            <div><span className="text-gray-500">{t("detail.location")}</span> {shipment.inspectielocatie ? shipment.inspectielocatie.substring(0, 40) : "-"}</div>
-            <div><span className="text-gray-500">{t("detail.reference")}</span> {shipment.referentie || "-"}</div>
-          </CardContent>
-        </Card>
+        {(() => {
+          const isConfirmed = ["INSPECTIE_GEPLAND", "DOCUMENTCONTROLE", "DOCUMENTCONTROLE_AFGEROND", "FYSIEKE_INSPECTIE", "GOEDGEKEURD", "WACHT_OP_VERVOLG", "GEBLOKKEERD"].includes(shipment.status);
+          const dateLabel = isConfirmed ? t("detail.scheduledDate") : t("detail.requestedDate");
+          return (
+            <Card className={!isConfirmed && shipment.inspectiedatum ? "border-amber-300 bg-amber-50/50" : ""}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">{t("detail.inspection")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                {!isConfirmed && shipment.inspectiedatum && (
+                  <div className="inline-flex items-center gap-1.5 rounded-md bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                    {t("detail.inspectionRequested")}
+                  </div>
+                )}
+                {isConfirmed && shipment.inspectiedatum && (
+                  <div className="inline-flex items-center gap-1.5 rounded-md bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+                    <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                    {t("detail.inspectionConfirmed")}
+                  </div>
+                )}
+                <div><span className="text-gray-500">{dateLabel}</span>{" "}
+                  {shipment.inspectiedatum
+                    ? new Date(shipment.inspectiedatum).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })
+                    : "-"}
+                </div>
+                <div><span className="text-gray-500">{t("detail.location")}</span> {shipment.inspectielocatie ? shipment.inspectielocatie.substring(0, 40) : "-"}</div>
+                <div><span className="text-gray-500">{t("detail.reference")}</span> {shipment.referentie || "-"}</div>
+              </CardContent>
+            </Card>
+          );
+        })()}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">{t("detail.transport")}</CardTitle>
