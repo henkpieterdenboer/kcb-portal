@@ -9,6 +9,7 @@ import { TodayInspections } from "@/components/dashboard/today-inspections";
 import { TodayArrivals } from "@/components/dashboard/today-arrivals";
 import { RecentShipments } from "@/components/dashboard/recent-shipments";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface DashboardData {
   totals: Record<string, number>;
@@ -49,7 +50,7 @@ interface DashboardData {
 }
 
 export default function DashboardPage() {
-  const { currentDate } = useDateContext();
+  const { currentDate, setSimulatedDate } = useDateContext();
   const { t } = useTranslation();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -95,8 +96,30 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Date header */}
-      <h2 className="text-2xl font-bold">{dateString}</h2>
+      {/* Date header with navigation */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => {
+            const prev = new Date(currentDate);
+            prev.setDate(prev.getDate() - 1);
+            setSimulatedDate(prev);
+          }}
+          className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <h2 className="text-2xl font-bold">{dateString}</h2>
+        <button
+          onClick={() => {
+            const next = new Date(currentDate);
+            next.setDate(next.getDate() + 1);
+            setSimulatedDate(next);
+          }}
+          className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      </div>
 
       {/* KPI row */}
       <KpiCards
