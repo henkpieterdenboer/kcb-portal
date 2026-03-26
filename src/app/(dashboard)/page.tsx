@@ -38,6 +38,7 @@ interface DashboardData {
     awb: string | null;
     exporteur: string | null;
     status: string;
+    inspectiedatum: string | null;
     subShipments: { botanischeNaam: string }[];
     inspectionReports: Array<{
       tijdAanvang: string | null;

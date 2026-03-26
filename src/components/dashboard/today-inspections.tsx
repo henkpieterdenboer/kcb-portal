@@ -12,6 +12,7 @@ interface InspectionShipment {
   awb: string | null;
   exporteur: string | null;
   status: string;
+  inspectiedatum: string | null;
   subShipments: { botanischeNaam: string }[];
   inspectionReports: Array<{
     tijdAanvang: string | null;
@@ -38,7 +39,16 @@ export function TodayInspections({ shipments }: { shipments: InspectionShipment[
           <div className="space-y-3">
             {shipments.map((s) => {
               const report = s.inspectionReports[0];
-              const time = report?.tijdAanvang || null;
+              // Use tijdAanvang from report, or extract time from inspectiedatum
+              let time = report?.tijdAanvang || null;
+              if (!time && s.inspectiedatum) {
+                const d = new Date(s.inspectiedatum);
+                const h = d.getUTCHours();
+                const m = d.getUTCMinutes();
+                if (h !== 0 || m !== 0) {
+                  time = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+                }
+              }
               return (
                 <Link
                   key={s.id}
@@ -46,11 +56,9 @@ export function TodayInspections({ shipments }: { shipments: InspectionShipment[
                   className="flex items-center justify-between rounded-md border p-3 transition-colors hover:bg-gray-50"
                 >
                   <div className="flex items-center gap-3">
-                    {time && (
-                      <span className="text-sm font-medium text-violet-600">
-                        {time}
-                      </span>
-                    )}
+                    <span className="w-14 shrink-0 text-center text-sm font-semibold text-violet-600">
+                      {time || "--:--"}
+                    </span>
                     <div>
                       <span className="font-mono text-sm font-medium">
                         {s.awb || s.aangiftenummer}
