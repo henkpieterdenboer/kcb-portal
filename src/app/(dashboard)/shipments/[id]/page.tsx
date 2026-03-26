@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { useTranslation } from "@/lib/i18n/context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -89,6 +90,7 @@ interface ShipmentDetail {
 
 export default function ShipmentDetailPage() {
   const params = useParams();
+  const { t } = useTranslation();
   const [shipment, setShipment] = useState<ShipmentDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -112,7 +114,7 @@ export default function ShipmentDetailPage() {
   }
 
   if (!shipment) {
-    return <div className="text-gray-500">Shipment not found</div>;
+    return <div className="text-gray-500">{t("shipments.notFound")}</div>;
   }
 
   return (
@@ -123,7 +125,7 @@ export default function ShipmentDetailPage() {
           className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Shipments
+          {t("shipments.backToShipments")}
         </Link>
       </div>
 
@@ -140,32 +142,32 @@ export default function ShipmentDetailPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Transport</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">{t("detail.transport")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1 text-sm">
-            <div><span className="text-gray-500">AWB:</span> <span className="font-mono">{shipment.awb || "-"}</span></div>
-            <div><span className="text-gray-500">Origin:</span> {shipment.landVanOorsprong || "-"}</div>
-            <div><span className="text-gray-500">Transport:</span> {shipment.transportNaarEU || "-"}</div>
+            <div><span className="text-gray-500">{t("detail.awb")}</span> <span className="font-mono">{shipment.awb || "-"}</span></div>
+            <div><span className="text-gray-500">{t("detail.origin")}</span> {shipment.landVanOorsprong || "-"}</div>
+            <div><span className="text-gray-500">{t("detail.transportLabel")}</span> {shipment.transportNaarEU || "-"}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Parties</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">{t("detail.parties")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1 text-sm">
-            <div><span className="text-gray-500">Declarant:</span> {shipment.aangever || "-"}</div>
-            <div><span className="text-gray-500">Relation:</span> {shipment.relatienaam || "-"}</div>
-            <div><span className="text-gray-500">Importer:</span> {shipment.importeur || "-"}</div>
+            <div><span className="text-gray-500">{t("detail.declarant")}</span> {shipment.aangever || "-"}</div>
+            <div><span className="text-gray-500">{t("detail.relation")}</span> {shipment.relatienaam || "-"}</div>
+            <div><span className="text-gray-500">{t("detail.importer")}</span> {shipment.importeur || "-"}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Inspection</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">{t("detail.inspection")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1 text-sm">
-            <div><span className="text-gray-500">Reference:</span> {shipment.referentie || "-"}</div>
-            <div><span className="text-gray-500">Location:</span> {shipment.inspectielocatie ? shipment.inspectielocatie.substring(0, 40) : "-"}</div>
-            <div><span className="text-gray-500">Date:</span> {shipment.inspectiedatum ? new Date(shipment.inspectiedatum).toLocaleDateString("nl-NL") : "-"}</div>
+            <div><span className="text-gray-500">{t("detail.reference")}</span> {shipment.referentie || "-"}</div>
+            <div><span className="text-gray-500">{t("detail.location")}</span> {shipment.inspectielocatie ? shipment.inspectielocatie.substring(0, 40) : "-"}</div>
+            <div><span className="text-gray-500">{t("detail.date")}</span> {shipment.inspectiedatum ? new Date(shipment.inspectiedatum).toLocaleDateString("nl-NL") : "-"}</div>
           </CardContent>
         </Card>
       </div>
@@ -174,18 +176,18 @@ export default function ShipmentDetailPage() {
       {shipment.subShipments.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Sub-shipments ({shipment.subShipments.length})</CardTitle>
+            <CardTitle className="text-base">{t("detail.subShipments")} ({shipment.subShipments.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Origin</TableHead>
-                  <TableHead className="text-right">Colli</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="text-right">Pieces</TableHead>
-                  <TableHead>TARIC</TableHead>
+                  <TableHead>{t("table.product")}</TableHead>
+                  <TableHead>{t("table.origin")}</TableHead>
+                  <TableHead className="text-right">{t("detail.colli")}</TableHead>
+                  <TableHead>{t("detail.type")}</TableHead>
+                  <TableHead className="text-right">{t("detail.pieces")}</TableHead>
+                  <TableHead>{t("detail.taric")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -215,7 +217,7 @@ export default function ShipmentDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <FileText className="h-4 w-4" />
-                Inspection Reports
+                {t("detail.inspectionReports")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -251,19 +253,19 @@ export default function ShipmentDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <AlertTriangle className="h-4 w-4 text-red-500" />
-                Blockade Reports
+                {t("detail.blockadeReports")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {shipment.blockadeReports.map((report) => (
                 <div key={report.id} className="rounded-md border border-red-200 bg-red-50 p-3">
                   <div className="font-mono text-sm font-medium">{report.dossiernummer}</div>
-                  <div className="mt-1 text-sm text-red-700">{report.reden || "Unknown reason"}</div>
+                  <div className="mt-1 text-sm text-red-700">{report.reden || t("detail.unknownReason")}</div>
                   {report.varieteit && (
-                    <div className="mt-1 text-sm text-gray-500">Variety: {report.varieteit}</div>
+                    <div className="mt-1 text-sm text-gray-500">{t("detail.variety")} {report.varieteit}</div>
                   )}
                   {report.monsternummer && (
-                    <div className="text-sm text-gray-500">Sample: {report.monsternummer}</div>
+                    <div className="text-sm text-gray-500">{t("detail.sample")} {report.monsternummer}</div>
                   )}
                 </div>
               ))}
@@ -277,7 +279,7 @@ export default function ShipmentDetailPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <FlaskConical className="h-4 w-4 text-orange-500" />
-                Sample Reports
+                {t("detail.sampleReports")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -290,12 +292,12 @@ export default function ShipmentDetailPage() {
                   </div>
                   {report.vermoedenOorzaak && (
                     <div className="text-sm text-orange-700">
-                      Suspect: {report.vermoedenOorzaak}
+                      {t("detail.suspect")} {report.vermoedenOorzaak}
                     </div>
                   )}
                   {report.diagnose && (
                     <div className="text-sm font-medium text-gray-700">
-                      Diagnosis: {report.diagnose}
+                      {t("detail.diagnosis")} {report.diagnose}
                     </div>
                   )}
                 </div>
@@ -320,7 +322,7 @@ export default function ShipmentDetailPage() {
       {/* Status Timeline */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Status History</CardTitle>
+          <CardTitle className="text-base">{t("detail.statusHistory")}</CardTitle>
         </CardHeader>
         <CardContent>
           <StatusTimeline history={shipment.statusHistory} />

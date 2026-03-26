@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shipments/status-badge";
 import { Plane } from "lucide-react";
+import { useTranslation } from "@/lib/i18n/context";
 
 interface ArrivalShipment {
   id: string;
@@ -16,18 +17,19 @@ interface ArrivalShipment {
 }
 
 export function TodayArrivals({ shipments }: { shipments: ArrivalShipment[] }) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Plane className="h-4 w-4 text-blue-600" />
-          Today&apos;s Arrivals ({shipments.length})
+          {t("dashboard.todayArrivals")} ({shipments.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
         {shipments.length === 0 ? (
           <p className="py-4 text-center text-sm text-gray-500">
-            No arrivals expected today
+            {t("dashboard.noArrivals")}
           </p>
         ) : (
           <div className="space-y-3">

@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Users, Plus, Pencil, Trash2, X, Check } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n/context";
 
 interface User {
   id: string;
@@ -42,6 +43,7 @@ const emptyForm: UserForm = { name: "", email: "", password: "", role: "USER" };
 
 export function UserManagement() {
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -85,13 +87,13 @@ export function UserManagement() {
     setSaving(false);
 
     if (res.ok) {
-      toast.success("User created");
+      toast.success(t("users.created"));
       setShowCreate(false);
       setForm(emptyForm);
       fetchUsers();
     } else {
       const data = await res.json();
-      toast.error(data.error || "Failed to create user");
+      toast.error(data.error || t("users.createFailed"));
     }
   }
 
@@ -113,25 +115,25 @@ export function UserManagement() {
     setSaving(false);
 
     if (res.ok) {
-      toast.success("User updated");
+      toast.success(t("users.updated"));
       cancelEdit();
       fetchUsers();
     } else {
       const data = await res.json();
-      toast.error(data.error || "Failed to update user");
+      toast.error(data.error || t("users.updateFailed"));
     }
   }
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
+    if (!confirm(t("users.deleteConfirm", { name }))) return;
 
     const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
     if (res.ok) {
-      toast.success("User deleted");
+      toast.success(t("users.deleted"));
       fetchUsers();
     } else {
       const data = await res.json();
-      toast.error(data.error || "Failed to delete user");
+      toast.error(data.error || t("users.deleteFailed"));
     }
   }
 
@@ -140,7 +142,7 @@ export function UserManagement() {
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle className="flex items-center gap-2 text-base">
           <Users className="h-4 w-4" />
-          User Management
+          {t("users.title")}
         </CardTitle>
         {!showCreate && !editingId && (
           <Button
@@ -153,7 +155,7 @@ export function UserManagement() {
             className="gap-1"
           >
             <Plus className="h-4 w-4" />
-            Add User
+            {t("users.addUser")}
           </Button>
         )}
       </CardHeader>
@@ -161,21 +163,21 @@ export function UserManagement() {
         {/* Create form */}
         {showCreate && (
           <div className="rounded-md border bg-gray-50 p-4 space-y-3">
-            <h4 className="text-sm font-medium">New User</h4>
+            <h4 className="text-sm font-medium">{t("users.newUser")}</h4>
             <div className="grid gap-3 sm:grid-cols-2">
               <Input
-                placeholder="Name"
+                placeholder={t("users.namePlaceholder")}
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
               <Input
-                placeholder="Email"
+                placeholder={t("users.emailPlaceholder")}
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
               <Input
-                placeholder="Password (min 8 chars)"
+                placeholder={t("users.passwordPlaceholder")}
                 type="password"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -185,19 +187,19 @@ export function UserManagement() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="USER">User</SelectItem>
-                  <SelectItem value="ADMIN">Admin</SelectItem>
+                  <SelectItem value="USER">{t("users.roleUser")}</SelectItem>
+                  <SelectItem value="ADMIN">{t("users.roleAdmin")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="flex gap-2">
               <Button size="sm" onClick={handleCreate} disabled={saving} className="gap-1">
                 <Check className="h-4 w-4" />
-                {saving ? "Creating..." : "Create"}
+                {saving ? t("users.creating") : t("users.create")}
               </Button>
               <Button size="sm" variant="outline" onClick={cancelEdit} className="gap-1">
                 <X className="h-4 w-4" />
-                Cancel
+                {t("users.cancel")}
               </Button>
             </div>
           </div>
@@ -208,10 +210,10 @@ export function UserManagement() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead>{t("table.name")}</TableHead>
+                <TableHead>{t("table.email")}</TableHead>
+                <TableHead>{t("table.role")}</TableHead>
+                <TableHead>{t("table.created")}</TableHead>
                 <TableHead className="w-[100px]" />
               </TableRow>
             </TableHeader>
@@ -239,14 +241,14 @@ export function UserManagement() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="USER">User</SelectItem>
-                          <SelectItem value="ADMIN">Admin</SelectItem>
+                          <SelectItem value="USER">{t("users.roleUser")}</SelectItem>
+                          <SelectItem value="ADMIN">{t("users.roleAdmin")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
                     <TableCell>
                       <Input
-                        placeholder="New password (leave empty to keep)"
+                        placeholder={t("users.editPasswordPlaceholder")}
                         type="password"
                         value={form.password}
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -310,14 +312,14 @@ export function UserManagement() {
               {loading && (
                 <TableRow>
                   <TableCell colSpan={5} className="py-8 text-center text-gray-500">
-                    Loading...
+                    {t("users.loading")}
                   </TableCell>
                 </TableRow>
               )}
               {!loading && users.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="py-8 text-center text-gray-500">
-                    No users found
+                    {t("users.noUsers")}
                   </TableCell>
                 </TableRow>
               )}

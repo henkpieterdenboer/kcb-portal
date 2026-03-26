@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useTranslation } from "@/lib/i18n/context";
 import { ShipmentTable } from "@/components/shipments/shipment-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -31,14 +32,16 @@ function ArchiveListContent() {
 }
 
 export default function ArchivePage() {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Archived Shipments</h2>
+        <h2 className="text-2xl font-bold">{t("shipments.archivedTitle")}</h2>
         <Link href="/shipments">
           <Button variant="outline" size="sm" className="gap-2">
             <ArrowLeft className="h-4 w-4" />
-            Active Shipments
+            {t("shipments.viewActive")}
           </Button>
         </Link>
       </div>

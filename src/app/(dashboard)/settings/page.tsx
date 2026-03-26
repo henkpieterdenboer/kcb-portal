@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import { useTranslation } from "@/lib/i18n/context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { UserManagement } from "@/components/settings/user-management";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const [showKey, setShowKey] = useState(false);
   const apiKeyPlaceholder = "Configure INGEST_API_KEY in .env";
   const isAdmin = (session?.user as { role?: string })?.role === "ADMIN";
@@ -18,22 +20,22 @@ export default function SettingsPage() {
   function copyEndpoint() {
     const url = `${window.location.origin}/api/ingest/email`;
     navigator.clipboard.writeText(url);
-    toast.success("Endpoint URL copied to clipboard");
+    toast.success(t("settings.copied"));
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Settings</h2>
+      <h2 className="text-2xl font-bold">{t("settings.title")}</h2>
 
       {isAdmin && <UserManagement />}
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Power Automate Integration</CardTitle>
+          <CardTitle className="text-base">{t("settings.paIntegration")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">API Endpoint</label>
+            <label className="text-sm font-medium">{t("settings.apiEndpoint")}</label>
             <div className="flex gap-2">
               <Input
                 readOnly
@@ -46,7 +48,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">API Key</label>
+            <label className="text-sm font-medium">{t("settings.apiKey")}</label>
             <div className="flex gap-2">
               <Input
                 readOnly
@@ -63,18 +65,18 @@ export default function SettingsPage() {
               </Button>
             </div>
             <p className="text-xs text-gray-500">
-              The API key is configured via the INGEST_API_KEY environment variable.
+              {t("settings.apiKeyHelp")}
             </p>
           </div>
 
           <div className="rounded-md bg-gray-50 p-4">
-            <h4 className="text-sm font-medium mb-2">Power Automate Setup</h4>
+            <h4 className="text-sm font-medium mb-2">{t("settings.paSetup")}</h4>
             <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
-              <li>Create a new flow triggered by incoming email from KCB</li>
-              <li>Add an HTTP action with POST method to the API endpoint above</li>
-              <li>Set header <code className="bg-gray-200 px-1 rounded">X-API-Key</code> to your API key</li>
-              <li>Set the body to include subject, from, receivedDateTime, and attachments</li>
-              <li>Map email attachments to the contentBytes field (base64)</li>
+              <li>{t("settings.paStep1")}</li>
+              <li>{t("settings.paStep2")}</li>
+              <li>{t("settings.paStep3")}</li>
+              <li>{t("settings.paStep4")}</li>
+              <li>{t("settings.paStep5")}</li>
             </ol>
           </div>
         </CardContent>

@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from "@/lib/i18n/context";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -28,7 +30,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (result?.error) {
-      setError("Invalid email or password");
+      setError(t("auth.invalidCredentials"));
     } else {
       router.push("/");
       router.refresh();
@@ -39,9 +41,9 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">KCB Dashboard</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t("auth.title")}</CardTitle>
           <p className="text-sm text-gray-500">
-            Sign in to access the inspection dashboard
+            {t("auth.subtitle")}
           </p>
         </CardHeader>
         <CardContent>
@@ -53,20 +55,20 @@ export default function LoginPage() {
             )}
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
-                Email
+                {t("auth.email")}
               </label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder={t("auth.emailPlaceholder")}
                 required
               />
             </div>
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium">
-                Password
+                {t("auth.password")}
               </label>
               <Input
                 id="password"
@@ -77,7 +79,7 @@ export default function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? t("auth.signingIn") : t("auth.signIn")}
             </Button>
           </form>
           {process.env.NEXT_PUBLIC_TEST_MODE === "true" && (
@@ -85,13 +87,13 @@ export default function LoginPage() {
               type="button"
               onClick={() => {
                 setEmail("admin@coloriginz.nl");
-                setPassword("admin123");
+                setPassword("KcbInspect!2026");
               }}
               className="mt-4 w-full rounded-md border border-dashed border-red-300 bg-red-50 p-3 text-left text-sm text-red-600 transition-colors hover:bg-red-100"
             >
-              <span className="font-medium">Test credentials</span>
+              <span className="font-medium">{t("auth.testCredentials")}</span>
               <br />
-              admin@coloriginz.nl / admin123
+              admin@coloriginz.nl / KcbInspect!2026
             </button>
           )}
         </CardContent>

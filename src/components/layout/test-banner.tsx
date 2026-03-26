@@ -3,9 +3,11 @@
 import { useDateContext } from "@/lib/date-context";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n/context";
 
 export function TestBanner() {
   const { currentDate, isSimulated, setSimulatedDate } = useDateContext();
+  const { t } = useTranslation();
 
   if (process.env.NEXT_PUBLIC_TEST_MODE !== "true") {
     return null;
@@ -15,9 +17,9 @@ export function TestBanner() {
 
   return (
     <div className="sticky top-0 z-50 flex items-center justify-center gap-4 bg-red-600 px-4 py-2 text-sm text-white">
-      <span className="font-semibold">Test Environment</span>
+      <span className="font-semibold">{t("testBanner.title")}</span>
       <div className="flex items-center gap-2">
-        <span>Simulated date:</span>
+        <span>{t("testBanner.simulatedDate")}</span>
         <Input
           type="date"
           value={dateValue}
@@ -36,7 +38,7 @@ export function TestBanner() {
             onClick={() => setSimulatedDate(null)}
             className="h-7 border-red-400 bg-transparent text-white hover:bg-red-700 hover:text-white"
           >
-            Reset
+            {t("testBanner.reset")}
           </Button>
         )}
       </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
-import { SHIPMENT_STATUSES, ACTIVE_STATUSES, STATUS_LABELS } from "@/types";
+import { SHIPMENT_STATUSES, ACTIVE_STATUSES } from "@/types";
+import { useTranslation } from "@/lib/i18n/context";
 
 interface StatusPipelineProps {
   totals: Record<string, number>;
@@ -21,6 +22,7 @@ const stageColors: Record<string, string> = {
 };
 
 export function StatusPipeline({ totals, showTerminal = false }: StatusPipelineProps) {
+  const { t } = useTranslation();
   const statuses = showTerminal ? SHIPMENT_STATUSES : ACTIVE_STATUSES;
 
   return (
@@ -30,7 +32,7 @@ export function StatusPipeline({ totals, showTerminal = false }: StatusPipelineP
           <div className="flex flex-col items-center gap-1 rounded-lg border bg-white p-3 shadow-sm">
             <div className={`h-2 w-16 rounded-full ${stageColors[status]}`} />
             <span className="text-xs font-medium text-gray-600">
-              {STATUS_LABELS[status]}
+              {t("status." + status)}
             </span>
             <span className="text-lg font-bold">{totals[status] || 0}</span>
           </div>

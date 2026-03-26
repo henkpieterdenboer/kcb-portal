@@ -16,7 +16,7 @@ async function main() {
   console.log("Seeding database...");
 
   // Create admin user
-  const hashedPassword = await bcrypt.hash("admin123", 12);
+  const hashedPassword = await bcrypt.hash("KcbInspect!2026", 12);
   await prisma.user.upsert({
     where: { email: "admin@coloriginz.nl" },
     update: { password: hashedPassword },
@@ -27,7 +27,7 @@ async function main() {
       role: "ADMIN",
     },
   });
-  console.log("Created admin user: admin@coloriginz.nl / admin123");
+  console.log("Created admin user: admin@coloriginz.nl / KcbInspect!2026");
 
   // Parse all PDFs from input/
   const inputDir = path.join(process.cwd(), "input");

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslation } from "@/lib/i18n/context";
 import {
   Table,
   TableBody,
@@ -21,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "./status-badge";
-import { SHIPMENT_STATUSES, ACTIVE_STATUSES, TERMINAL_STATUSES, STATUS_LABELS, ShipmentStatus } from "@/types";
+import { SHIPMENT_STATUSES, ACTIVE_STATUSES, TERMINAL_STATUSES } from "@/types";
 import { Search } from "lucide-react";
 
 interface ShipmentRow {
@@ -54,6 +55,7 @@ interface ShipmentTableProps {
 export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   const [search, setSearch] = useState(searchParams.get("search") || "");
 
   const basePath = mode === "archived" ? "/shipments/archive" : "/shipments";
@@ -79,7 +81,7 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
-            placeholder="Search declaration no., AWB, exporter..."
+            placeholder={t("shipments.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => {
@@ -93,19 +95,19 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
           onValueChange={(v) => applyFilters({ status: v === "ALL" ? "" : (v ?? "") })}
         >
           <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="All statuses" />
+            <SelectValue placeholder={t("shipments.allStatuses")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="ALL">All statuses</SelectItem>
+            <SelectItem value="ALL">{t("shipments.allStatuses")}</SelectItem>
             {filterStatuses.map((s) => (
               <SelectItem key={s} value={s}>
-                {STATUS_LABELS[s as ShipmentStatus]}
+                {t("status." + s)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Button variant="outline" onClick={() => applyFilters({ search })}>
-          Filter
+          {t("shipments.filter")}
         </Button>
       </div>
 
@@ -113,12 +115,12 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>AWB</TableHead>
-              <TableHead>Exporter</TableHead>
-              <TableHead>Product</TableHead>
-              <TableHead>Origin</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Updated</TableHead>
+              <TableHead>{t("table.awb")}</TableHead>
+              <TableHead>{t("table.exporter")}</TableHead>
+              <TableHead>{t("table.product")}</TableHead>
+              <TableHead>{t("table.origin")}</TableHead>
+              <TableHead>{t("table.status")}</TableHead>
+              <TableHead>{t("table.updated")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -150,7 +152,7 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
             {shipments.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="py-8 text-center text-gray-500">
-                  No shipments found
+                  {t("shipments.noShipments")}
                 </TableCell>
               </TableRow>
             )}
@@ -161,9 +163,11 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-600">
-            Showing {(pagination.page - 1) * pagination.pageSize + 1}-
-            {Math.min(pagination.page * pagination.pageSize, pagination.total)} of{" "}
-            {pagination.total}
+            {t("shipments.showing", {
+              start: (pagination.page - 1) * pagination.pageSize + 1,
+              end: Math.min(pagination.page * pagination.pageSize, pagination.total),
+              total: pagination.total,
+            })}
           </p>
           <div className="flex gap-2">
             <Button
@@ -172,7 +176,7 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
               disabled={pagination.page <= 1}
               onClick={() => applyFilters({ page: String(pagination.page - 1) })}
             >
-              Previous
+              {t("shipments.previous")}
             </Button>
             <Button
               variant="outline"
@@ -180,7 +184,7 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
               disabled={pagination.page >= pagination.totalPages}
               onClick={() => applyFilters({ page: String(pagination.page + 1) })}
             >
-              Next
+              {t("shipments.next")}
             </Button>
           </div>
         </div>

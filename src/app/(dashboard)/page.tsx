@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useDateContext } from "@/lib/date-context";
+import { useTranslation } from "@/lib/i18n/context";
 import { KpiCards } from "@/components/dashboard/kpi-cards";
 import { StatusPipeline } from "@/components/dashboard/status-pipeline";
 import { TodayInspections } from "@/components/dashboard/today-inspections";
@@ -48,6 +49,7 @@ interface DashboardData {
 
 export default function DashboardPage() {
   const { currentDate } = useDateContext();
+  const { t } = useTranslation();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -111,7 +113,7 @@ export default function DashboardPage() {
 
       {/* Active Status Pipeline */}
       <div className="rounded-lg border bg-white p-4">
-        <h3 className="mb-4 font-semibold">Active Status Pipeline</h3>
+        <h3 className="mb-4 font-semibold">{t("dashboard.activePipeline")}</h3>
         <StatusPipeline totals={data.totals} />
       </div>
 

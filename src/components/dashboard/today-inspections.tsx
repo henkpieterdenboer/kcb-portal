@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shipments/status-badge";
 import { ClipboardCheck } from "lucide-react";
+import { useTranslation } from "@/lib/i18n/context";
 
 interface InspectionShipment {
   id: string;
@@ -19,18 +20,19 @@ interface InspectionShipment {
 }
 
 export function TodayInspections({ shipments }: { shipments: InspectionShipment[] }) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <ClipboardCheck className="h-4 w-4 text-violet-600" />
-          Today&apos;s Inspections ({shipments.length})
+          {t("dashboard.todayInspections")} ({shipments.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
         {shipments.length === 0 ? (
           <p className="py-4 text-center text-sm text-gray-500">
-            No inspections scheduled for today
+            {t("dashboard.noInspections")}
           </p>
         ) : (
           <div className="space-y-3">
