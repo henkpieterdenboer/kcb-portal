@@ -31,3 +31,17 @@ export const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
+
+export const createUserSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  name: z.string().min(1, "Name is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  role: z.enum(["ADMIN", "USER"]),
+});
+
+export const updateUserSchema = z.object({
+  name: z.string().min(1, "Name is required").optional(),
+  email: z.string().email("Invalid email address").optional(),
+  password: z.string().min(8, "Password must be at least 8 characters").optional(),
+  role: z.enum(["ADMIN", "USER"]).optional(),
+});

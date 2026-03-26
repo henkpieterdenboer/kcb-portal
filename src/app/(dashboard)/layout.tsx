@@ -1,15 +1,33 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { TestBanner } from "@/components/layout/test-banner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // TODO: re-enable auth check after login is fixed
+  const { status } = useSession();
+  const router = useRouter();
+
+  if (status === "loading") {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Skeleton className="h-8 w-48" />
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    router.push("/login");
+    return null;
+  }
+
   return (
     <div className="flex h-screen flex-col">
       <TestBanner />

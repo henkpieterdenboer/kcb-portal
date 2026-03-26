@@ -34,6 +34,7 @@ interface DashboardData {
   todayInspections: Array<{
     id: string;
     aangiftenummer: string;
+    awb: string | null;
     exporteur: string | null;
     status: string;
     subShipments: { botanischeNaam: string }[];

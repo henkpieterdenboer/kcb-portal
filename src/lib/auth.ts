@@ -20,9 +20,7 @@ export const authOptions: NextAuthOptions = {
 
         if (!user) return null;
 
-        // Try bcrypt first, fall back to plaintext compare for dev seeded users
-        const isValid = await bcrypt.compare(credentials.password, user.password)
-          || credentials.password === user.password;
+        const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) return null;
 
         return { id: user.id, email: user.email, name: user.name, role: user.role };

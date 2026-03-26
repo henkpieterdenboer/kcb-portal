@@ -80,6 +80,20 @@ export default function LoginPage() {
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
+          {process.env.NEXT_PUBLIC_TEST_MODE === "true" && (
+            <button
+              type="button"
+              onClick={() => {
+                setEmail("admin@coloriginz.nl");
+                setPassword("admin123");
+              }}
+              className="mt-4 w-full rounded-md border border-dashed border-red-300 bg-red-50 p-3 text-left text-sm text-red-600 transition-colors hover:bg-red-100"
+            >
+              <span className="font-medium">Test credentials</span>
+              <br />
+              admin@coloriginz.nl / admin123
+            </button>
+          )}
         </CardContent>
       </Card>
     </div>

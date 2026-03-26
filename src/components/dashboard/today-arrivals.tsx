@@ -39,7 +39,7 @@ export function TodayArrivals({ shipments }: { shipments: ArrivalShipment[] }) {
               >
                 <div>
                   <span className="font-mono text-sm font-medium">
-                    {s.aangiftenummer}
+                    {s.awb || s.aangiftenummer}
                   </span>
                   <span className="ml-2 text-sm text-gray-500">
                     {s.exporteur}
@@ -50,14 +50,7 @@ export function TodayArrivals({ shipments }: { shipments: ArrivalShipment[] }) {
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
-                  {s.awb && (
-                    <span className="font-mono text-xs text-gray-500">
-                      {s.awb}
-                    </span>
-                  )}
-                  <StatusBadge status={s.status} />
-                </div>
+                <StatusBadge status={s.status} />
               </Link>
             ))}
           </div>

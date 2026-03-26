@@ -8,6 +8,7 @@ import { ClipboardCheck } from "lucide-react";
 interface InspectionShipment {
   id: string;
   aangiftenummer: string;
+  awb: string | null;
   exporteur: string | null;
   status: string;
   subShipments: { botanischeNaam: string }[];
@@ -50,7 +51,7 @@ export function TodayInspections({ shipments }: { shipments: InspectionShipment[
                     )}
                     <div>
                       <span className="font-mono text-sm font-medium">
-                        {s.aangiftenummer}
+                        {s.awb || s.aangiftenummer}
                       </span>
                       <span className="ml-2 text-sm text-gray-500">
                         {s.exporteur}

@@ -31,11 +31,10 @@ export function RecentShipments({ shipments }: { shipments: ShipmentRow[] }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Declaration No.</TableHead>
+            <TableHead>AWB</TableHead>
             <TableHead>Exporter</TableHead>
             <TableHead>Product</TableHead>
             <TableHead>Origin</TableHead>
-            <TableHead>AWB</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Updated</TableHead>
           </TableRow>
@@ -44,16 +43,15 @@ export function RecentShipments({ shipments }: { shipments: ShipmentRow[] }) {
           {shipments.map((s) => (
             <TableRow key={s.id} className="cursor-pointer hover:bg-gray-50">
               <TableCell>
-                <Link href={`/shipments/${s.id}`} className="font-medium text-blue-600 hover:underline">
-                  {s.aangiftenummer}
+                <Link href={`/shipments/${s.id}`} className="font-mono text-sm font-medium text-blue-600 hover:underline">
+                  {s.awb || s.aangiftenummer}
                 </Link>
               </TableCell>
-              <TableCell className="max-w-[200px] truncate">{s.exporteur || "-"}</TableCell>
-              <TableCell>
+              <TableCell className="max-w-[180px] truncate">{s.exporteur || "-"}</TableCell>
+              <TableCell className="max-w-[200px] truncate">
                 {s.subShipments.map((sub) => sub.botanischeNaam).join(", ") || "-"}
               </TableCell>
               <TableCell>{s.landVanOorsprong || "-"}</TableCell>
-              <TableCell className="font-mono text-sm">{s.awb || "-"}</TableCell>
               <TableCell>
                 <StatusBadge status={s.status} />
               </TableCell>
@@ -64,7 +62,7 @@ export function RecentShipments({ shipments }: { shipments: ShipmentRow[] }) {
           ))}
           {shipments.length === 0 && (
             <TableRow>
-              <TableCell colSpan={7} className="py-8 text-center text-gray-500">
+              <TableCell colSpan={6} className="py-8 text-center text-gray-500">
                 No shipments found
               </TableCell>
             </TableRow>

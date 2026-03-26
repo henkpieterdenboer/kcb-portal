@@ -113,13 +113,11 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Declaration No.</TableHead>
+              <TableHead>AWB</TableHead>
               <TableHead>Exporter</TableHead>
               <TableHead>Product</TableHead>
               <TableHead>Origin</TableHead>
-              <TableHead>AWB</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Reports</TableHead>
               <TableHead>Updated</TableHead>
             </TableRow>
           </TableHeader>
@@ -129,30 +127,20 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
                 <TableCell>
                   <Link
                     href={`/shipments/${s.id}`}
-                    className="font-medium text-blue-600 hover:underline"
+                    className="font-mono text-sm font-medium text-blue-600 hover:underline"
                   >
-                    {s.aangiftenummer}
+                    {s.awb || s.aangiftenummer}
                   </Link>
                 </TableCell>
-                <TableCell className="max-w-[200px] truncate">
+                <TableCell className="max-w-[180px] truncate">
                   {s.exporteur || "-"}
                 </TableCell>
-                <TableCell>
+                <TableCell className="max-w-[200px] truncate">
                   {s.subShipments.map((sub) => sub.botanischeNaam).join(", ") || "-"}
                 </TableCell>
                 <TableCell>{s.landVanOorsprong || "-"}</TableCell>
-                <TableCell className="font-mono text-sm">{s.awb || "-"}</TableCell>
                 <TableCell>
                   <StatusBadge status={s.status} />
-                </TableCell>
-                <TableCell className="text-sm text-gray-500">
-                  {s._count.inspectionReports > 0 && `${s._count.inspectionReports} insp`}
-                  {s._count.blockadeReports > 0 && ` ${s._count.blockadeReports} block`}
-                  {s._count.sampleReports > 0 && ` ${s._count.sampleReports} sample`}
-                  {s._count.inspectionReports === 0 &&
-                    s._count.blockadeReports === 0 &&
-                    s._count.sampleReports === 0 &&
-                    "-"}
                 </TableCell>
                 <TableCell className="text-sm text-gray-500">
                   {new Date(s.updatedAt).toLocaleDateString("nl-NL")}
@@ -161,7 +149,7 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
             ))}
             {shipments.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} className="py-8 text-center text-gray-500">
+                <TableCell colSpan={6} className="py-8 text-center text-gray-500">
                   No shipments found
                 </TableCell>
               </TableRow>
