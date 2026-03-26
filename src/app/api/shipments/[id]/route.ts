@@ -15,6 +15,7 @@ export async function GET(
       sampleReports: { orderBy: { createdAt: "desc" } },
       blockadeReports: { orderBy: { createdAt: "desc" } },
       statusHistory: { orderBy: { timestamp: "asc" } },
+      emailIngestion: true,
     },
   });
 

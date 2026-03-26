@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { subject, from, receivedDateTime, attachments } = parsed.data;
+  const { subject, from, receivedDateTime, body: emailBody, bodyHtml: emailBodyHtml, attachments } = parsed.data;
 
   // Create email ingestion record
   const pdfAttachments = attachments.filter(
@@ -34,6 +34,9 @@ export async function POST(request: NextRequest) {
       receivedAt: receivedDateTime ? new Date(receivedDateTime) : null,
       attachmentCount: pdfAttachments.length,
       status: "PROCESSING",
+      emailBody: emailBody || null,
+      emailBodyHtml: emailBodyHtml || null,
+      rawPayload: body as object,
     },
   });
 

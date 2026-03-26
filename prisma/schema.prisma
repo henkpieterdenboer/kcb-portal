@@ -176,6 +176,9 @@ model EmailIngestion {
   attachmentCount Int       @default(0) @map("attachment_count")
   status          String    @default("PROCESSED")
   errors          String?
+  emailBody       String?   @map("email_body")
+  emailBodyHtml   String?   @map("email_body_html")
+  rawPayload      Json?     @map("raw_payload")
   shipments       Shipment[]
 
   @@map("email_ingestions")

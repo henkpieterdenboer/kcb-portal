@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { shipmentsQuerySchema } from "@/lib/validations";
+import { TERMINAL_STATUSES, ACTIVE_STATUSES } from "@/types";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -10,10 +11,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid query parameters" }, { status: 400 });
   }
 
-  const { status, dateFrom, dateTo, search, page, pageSize } = query.data;
+  const { status, dateFrom, dateTo, search, archived, page, pageSize } = query.data;
 
   const where: Record<string, unknown> = {};
 
+  // Archive filter
+  if (archived === "true") {
+    where.status = { in: TERMINAL_STATUSES as string[] };
+  } else if (archived === "false") {
+    where.status = { in: ACTIVE_STATUSES as string[] };
+  }
+  // archived === "all" -> no status filter
+
+  // Explicit status filter overrides archive filter
   if (status) {
     where.status = status;
   }

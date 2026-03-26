@@ -6,9 +6,9 @@ import { useSearchParams } from "next/navigation";
 import { ShipmentTable } from "@/components/shipments/shipment-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Archive } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
-function ShipmentListContent() {
+function ArchiveListContent() {
   const searchParams = useSearchParams();
   const [data, setData] = useState<{ shipments: []; pagination: { total: 0; page: 1; pageSize: 20; totalPages: 0 } } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -16,7 +16,7 @@ function ShipmentListContent() {
   useEffect(() => {
     setLoading(true);
     const params = new URLSearchParams(searchParams.toString());
-    if (!params.has("archived")) params.set("archived", "false");
+    params.set("archived", "true");
     fetch(`/api/shipments?${params.toString()}`)
       .then((res) => res.json())
       .then(setData)
@@ -27,23 +27,23 @@ function ShipmentListContent() {
     return <Skeleton className="h-[600px]" />;
   }
 
-  return <ShipmentTable shipments={data.shipments} pagination={data.pagination} mode="active" />;
+  return <ShipmentTable shipments={data.shipments} pagination={data.pagination} mode="archived" />;
 }
 
-export default function ShipmentsPage() {
+export default function ArchivePage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Active Shipments</h2>
-        <Link href="/shipments/archive">
+        <h2 className="text-2xl font-bold">Archived Shipments</h2>
+        <Link href="/shipments">
           <Button variant="outline" size="sm" className="gap-2">
-            <Archive className="h-4 w-4" />
-            View Archive
+            <ArrowLeft className="h-4 w-4" />
+            Active Shipments
           </Button>
         </Link>
       </div>
       <Suspense fallback={<Skeleton className="h-[600px]" />}>
-        <ShipmentListContent />
+        <ArchiveListContent />
       </Suspense>
     </div>
   );

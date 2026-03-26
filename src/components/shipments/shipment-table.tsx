@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "./status-badge";
-import { SHIPMENT_STATUSES, STATUS_LABELS, ShipmentStatus } from "@/types";
+import { SHIPMENT_STATUSES, ACTIVE_STATUSES, TERMINAL_STATUSES, STATUS_LABELS, ShipmentStatus } from "@/types";
 import { Search } from "lucide-react";
 
 interface ShipmentRow {
@@ -48,12 +48,20 @@ interface ShipmentTableProps {
     pageSize: number;
     totalPages: number;
   };
+  mode?: "active" | "archived";
 }
 
-export function ShipmentTable({ shipments, pagination }: ShipmentTableProps) {
+export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("search") || "");
+
+  const basePath = mode === "archived" ? "/shipments/archive" : "/shipments";
+  const filterStatuses = mode === "archived"
+    ? TERMINAL_STATUSES
+    : mode === "active"
+      ? ACTIVE_STATUSES
+      : SHIPMENT_STATUSES;
 
   function applyFilters(params: Record<string, string>) {
     const sp = new URLSearchParams(searchParams.toString());
@@ -62,7 +70,7 @@ export function ShipmentTable({ shipments, pagination }: ShipmentTableProps) {
       else sp.delete(k);
     }
     sp.set("page", "1");
-    router.push(`/shipments?${sp.toString()}`);
+    router.push(`${basePath}?${sp.toString()}`);
   }
 
   return (
@@ -89,7 +97,7 @@ export function ShipmentTable({ shipments, pagination }: ShipmentTableProps) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="ALL">All statuses</SelectItem>
-            {SHIPMENT_STATUSES.map((s) => (
+            {filterStatuses.map((s) => (
               <SelectItem key={s} value={s}>
                 {STATUS_LABELS[s as ShipmentStatus]}
               </SelectItem>

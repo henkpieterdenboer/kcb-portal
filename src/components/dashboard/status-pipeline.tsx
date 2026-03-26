@@ -1,10 +1,11 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
-import { SHIPMENT_STATUSES, STATUS_LABELS } from "@/types";
+import { SHIPMENT_STATUSES, ACTIVE_STATUSES, STATUS_LABELS } from "@/types";
 
 interface StatusPipelineProps {
   totals: Record<string, number>;
+  showTerminal?: boolean;
 }
 
 const stageColors: Record<string, string> = {
@@ -19,10 +20,12 @@ const stageColors: Record<string, string> = {
   GEBLOKKEERD: "bg-red-500",
 };
 
-export function StatusPipeline({ totals }: StatusPipelineProps) {
+export function StatusPipeline({ totals, showTerminal = false }: StatusPipelineProps) {
+  const statuses = showTerminal ? SHIPMENT_STATUSES : ACTIVE_STATUSES;
+
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {SHIPMENT_STATUSES.map((status, i) => (
+      {statuses.map((status, i) => (
         <div key={status} className="flex items-center gap-2">
           <div className="flex flex-col items-center gap-1 rounded-lg border bg-white p-3 shadow-sm">
             <div className={`h-2 w-16 rounded-full ${stageColors[status]}`} />
@@ -31,7 +34,7 @@ export function StatusPipeline({ totals }: StatusPipelineProps) {
             </span>
             <span className="text-lg font-bold">{totals[status] || 0}</span>
           </div>
-          {i < SHIPMENT_STATUSES.length - 1 && (
+          {i < statuses.length - 1 && (
             <ChevronRight className="h-4 w-4 text-gray-400" />
           )}
         </div>

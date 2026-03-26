@@ -16,6 +16,7 @@ import {
 import { StatusBadge } from "@/components/shipments/status-badge";
 import { StatusTimeline } from "@/components/shipments/status-timeline";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmailViewer } from "@/components/shipments/email-viewer";
 import { ArrowLeft, FileText, AlertTriangle, FlaskConical } from "lucide-react";
 
 interface ShipmentDetail {
@@ -75,6 +76,15 @@ interface ShipmentDetail {
     details: string | null;
     timestamp: string;
   }>;
+  emailIngestion: {
+    id: string;
+    subject: string | null;
+    fromAddress: string | null;
+    receivedAt: string | null;
+    emailBody: string | null;
+    emailBodyHtml: string | null;
+    attachmentCount: number;
+  } | null;
 }
 
 export default function ShipmentDetailPage() {
@@ -294,6 +304,18 @@ export default function ShipmentDetailPage() {
           </Card>
         )}
       </div>
+
+      {/* Original Email */}
+      {shipment.emailIngestion && (
+        <EmailViewer
+          subject={shipment.emailIngestion.subject}
+          fromAddress={shipment.emailIngestion.fromAddress}
+          receivedAt={shipment.emailIngestion.receivedAt}
+          emailBody={shipment.emailIngestion.emailBody}
+          emailBodyHtml={shipment.emailIngestion.emailBodyHtml}
+          attachmentCount={shipment.emailIngestion.attachmentCount}
+        />
+      )}
 
       {/* Status Timeline */}
       <Card>

@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Ship, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Ship, Archive, Settings, LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Shipments", href: "/shipments", icon: Ship },
+  { name: "Archive", href: "/shipments/archive", icon: Archive },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -25,7 +26,9 @@ export function Sidebar() {
           const isActive =
             item.href === "/"
               ? pathname === "/"
-              : pathname.startsWith(item.href);
+              : item.href === "/shipments"
+                ? pathname === "/shipments"
+                : pathname.startsWith(item.href);
           return (
             <Link
               key={item.name}

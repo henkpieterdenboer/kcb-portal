@@ -4,6 +4,8 @@ export const emailIngestionSchema = z.object({
   subject: z.string().optional(),
   from: z.string().optional(),
   receivedDateTime: z.string().optional(),
+  body: z.string().optional(),
+  bodyHtml: z.string().optional(),
   attachments: z.array(
     z.object({
       name: z.string(),
@@ -20,6 +22,7 @@ export const shipmentsQuerySchema = z.object({
   dateFrom: z.string().optional(),
   dateTo: z.string().optional(),
   search: z.string().optional(),
+  archived: z.enum(["true", "false", "all"]).optional().default("false"),
   page: z.coerce.number().optional().default(1),
   pageSize: z.coerce.number().optional().default(20),
 });

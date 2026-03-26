@@ -36,6 +36,15 @@ export const STATUS_COLORS: Record<ShipmentStatus, string> = {
   GEBLOKKEERD: "bg-red-100 text-red-800",
 };
 
+export const TERMINAL_STATUSES: ShipmentStatus[] = ["GOEDGEKEURD", "WACHT_OP_VERVOLG", "GEBLOKKEERD"];
+export const ACTIVE_STATUSES = SHIPMENT_STATUSES.filter(
+  (s) => !(TERMINAL_STATUSES as string[]).includes(s)
+);
+
+export function isTerminalStatus(status: string): boolean {
+  return (TERMINAL_STATUSES as string[]).includes(status);
+}
+
 export type DocumentType = "MEDEDELING" | "INSPECTIE" | "MONSTER" | "BLOKKADE" | "UNKNOWN";
 
 export function normalizeStatus(rawStatus: string): ShipmentStatus {

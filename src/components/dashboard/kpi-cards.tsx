@@ -1,46 +1,41 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Ship, CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import { Plane, ClipboardCheck, Ship, AlertTriangle } from "lucide-react";
 
 interface KpiCardsProps {
-  totals: Record<string, number>;
+  todayArrivals: number;
+  todayInspections: number;
+  activeShipments: number;
+  blocked: number;
 }
 
-export function KpiCards({ totals }: KpiCardsProps) {
-  const inProcess =
-    (totals.AANGEMELD || 0) +
-    (totals.INSPECTIE_AANGEVRAAGD || 0) +
-    (totals.INSPECTIE_GEPLAND || 0) +
-    (totals.DOCUMENTCONTROLE || 0) +
-    (totals.DOCUMENTCONTROLE_AFGEROND || 0) +
-    (totals.FYSIEKE_INSPECTIE || 0);
-
+export function KpiCards({ todayArrivals, todayInspections, activeShipments, blocked }: KpiCardsProps) {
   const cards = [
     {
-      title: "Total Shipments",
-      value: totals.total || 0,
-      icon: Ship,
+      title: "Arrivals Today",
+      value: todayArrivals,
+      icon: Plane,
       color: "text-blue-600",
       bg: "bg-blue-50",
     },
     {
-      title: "In Process",
-      value: inProcess,
-      icon: Clock,
+      title: "Inspections Today",
+      value: todayInspections,
+      icon: ClipboardCheck,
+      color: "text-violet-600",
+      bg: "bg-violet-50",
+    },
+    {
+      title: "Active Shipments",
+      value: activeShipments,
+      icon: Ship,
       color: "text-yellow-600",
       bg: "bg-yellow-50",
     },
     {
-      title: "Approved",
-      value: totals.GOEDGEKEURD || 0,
-      icon: CheckCircle,
-      color: "text-green-600",
-      bg: "bg-green-50",
-    },
-    {
-      title: "Blocked / Awaiting",
-      value: (totals.GEBLOKKEERD || 0) + (totals.WACHT_OP_VERVOLG || 0),
+      title: "Blocked",
+      value: blocked,
       icon: AlertTriangle,
       color: "text-red-600",
       bg: "bg-red-50",
