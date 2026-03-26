@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Ship, Archive, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Ship, Archive, Mail, Settings, LogOut } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n/context";
@@ -10,12 +11,17 @@ import { useTranslation } from "@/lib/i18n/context";
 export function Sidebar() {
   const pathname = usePathname();
   const { t } = useTranslation();
+  const { data: session } = useSession();
+  const isAdmin = (session?.user as { role?: string })?.role === "ADMIN";
 
   const navigation = [
     { name: t("nav.dashboard"), href: "/", icon: LayoutDashboard },
     { name: t("nav.shipments"), href: "/shipments", icon: Ship },
     { name: t("nav.archive"), href: "/shipments/archive", icon: Archive },
     { name: t("nav.settings"), href: "/settings", icon: Settings },
+    ...(isAdmin
+      ? [{ name: t("nav.emailLog"), href: "/settings/emails", icon: Mail }]
+      : []),
   ];
 
   return (

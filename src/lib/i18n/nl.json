@@ -4,6 +4,7 @@
     "shipments": "Zendingen",
     "archive": "Archief",
     "settings": "Instellingen",
+    "emailLog": "E-maillog",
     "signOut": "Uitloggen",
     "appTitle": "KCB Dashboard"
   },
@@ -98,6 +99,27 @@
     "file": "bestand",
     "files": "bestanden",
     "noBody": "Geen e-mailinhoud beschikbaar"
+  },
+  "emailLog": {
+    "title": "E-mail ingestie log",
+    "search": "Zoek onderwerp, afzender...",
+    "allStatuses": "Alle statussen",
+    "received": "Ontvangen",
+    "subject": "Onderwerp",
+    "from": "Van",
+    "attachments": "Bijlagen",
+    "status": "Status",
+    "shipments": "Zendingen",
+    "errors": "Fouten",
+    "noEmails": "Geen e-mails gevonden",
+    "statusProcessed": "Verwerkt",
+    "statusPartialError": "Gedeeltelijke fout",
+    "statusProcessing": "Verwerken",
+    "showing": "{start}-{end} van {total} weergegeven",
+    "previous": "Vorige",
+    "next": "Volgende",
+    "errorDetails": "Foutdetails",
+    "linkedShipments": "{count} zending(en)"
   },
   "settings": {
     "title": "Instellingen",

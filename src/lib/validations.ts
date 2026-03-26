@@ -27,6 +27,13 @@ export const shipmentsQuerySchema = z.object({
   pageSize: z.coerce.number().optional().default(20),
 });
 
+export const emailIngestionsQuerySchema = z.object({
+  status: z.string().optional(),
+  search: z.string().optional(),
+  page: z.coerce.number().optional().default(1),
+  pageSize: z.coerce.number().optional().default(20),
+});
+
 export const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),

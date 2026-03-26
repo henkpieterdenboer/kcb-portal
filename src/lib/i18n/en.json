@@ -4,6 +4,7 @@
     "shipments": "Shipments",
     "archive": "Archive",
     "settings": "Settings",
+    "emailLog": "Email Log",
     "signOut": "Sign Out",
     "appTitle": "KCB Dashboard"
   },
@@ -98,6 +99,27 @@
     "file": "file",
     "files": "files",
     "noBody": "No email body available"
+  },
+  "emailLog": {
+    "title": "Email Ingestion Log",
+    "search": "Search subject, sender...",
+    "allStatuses": "All statuses",
+    "received": "Received",
+    "subject": "Subject",
+    "from": "From",
+    "attachments": "Attachments",
+    "status": "Status",
+    "shipments": "Shipments",
+    "errors": "Errors",
+    "noEmails": "No emails found",
+    "statusProcessed": "Processed",
+    "statusPartialError": "Partial Error",
+    "statusProcessing": "Processing",
+    "showing": "Showing {start}-{end} of {total}",
+    "previous": "Previous",
+    "next": "Next",
+    "errorDetails": "Error details",
+    "linkedShipments": "{count} shipment(s)"
   },
   "settings": {
     "title": "Settings",

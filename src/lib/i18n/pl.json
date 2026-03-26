@@ -4,6 +4,7 @@
     "shipments": "Przesylki",
     "archive": "Archiwum",
     "settings": "Ustawienia",
+    "emailLog": "Dziennik e-mail",
     "signOut": "Wyloguj",
     "appTitle": "KCB Panel"
   },
@@ -98,6 +99,27 @@
     "file": "plik",
     "files": "pliki",
     "noBody": "Brak tresci e-maila"
+  },
+  "emailLog": {
+    "title": "Dziennik przyjmowania e-maili",
+    "search": "Szukaj temat, nadawca...",
+    "allStatuses": "Wszystkie statusy",
+    "received": "Odebrano",
+    "subject": "Temat",
+    "from": "Od",
+    "attachments": "Zalaczniki",
+    "status": "Status",
+    "shipments": "Przesylki",
+    "errors": "Bledy",
+    "noEmails": "Nie znaleziono e-maili",
+    "statusProcessed": "Przetworzono",
+    "statusPartialError": "Czesciowy blad",
+    "statusProcessing": "Przetwarzanie",
+    "showing": "Wyswietlanie {start}-{end} z {total}",
+    "previous": "Poprzednia",
+    "next": "Nastepna",
+    "errorDetails": "Szczegoly bledu",
+    "linkedShipments": "{count} przesylka(i)"
   },
   "settings": {
     "title": "Ustawienia",
