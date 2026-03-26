@@ -76,6 +76,7 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
       inspectielocatie: data.inspectielocatie,
       verwachteAankomst: data.verwachteAankomst,
       status: data.status,
+      emailIngestionId,
     },
   });
 
