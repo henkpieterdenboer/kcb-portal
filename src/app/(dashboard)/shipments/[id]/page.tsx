@@ -362,6 +362,19 @@ export default function ShipmentDetailPage() {
         )}
       </div>
 
+      {/* Status Timeline */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t("detail.statusHistory")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <StatusTimeline
+            history={shipment.statusHistory}
+            onViewEmail={shipment.emailIngestion ? () => openEmailDetail(shipment.emailIngestion!.id) : undefined}
+          />
+        </CardContent>
+      </Card>
+
       {/* Original Email */}
       {shipment.emailIngestion && (
         <Card>
@@ -397,16 +410,6 @@ export default function ShipmentDetailPage() {
           </CardContent>
         </Card>
       )}
-
-      {/* Status Timeline */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">{t("detail.statusHistory")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <StatusTimeline history={shipment.statusHistory} />
-        </CardContent>
-      </Card>
       {/* Email detail sheet */}
       <Sheet
         open={emailSheetOpen}
@@ -415,7 +418,7 @@ export default function ShipmentDetailPage() {
           if (!open) setEmailSheet(null);
         }}
       >
-        <SheetContent side="right" className="sm:max-w-[50vw] overflow-y-auto">
+        <SheetContent side="right" className="w-[50vw] max-w-[50vw] overflow-y-auto">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
