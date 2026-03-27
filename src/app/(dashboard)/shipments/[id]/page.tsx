@@ -17,8 +17,14 @@ import {
 import { StatusBadge } from "@/components/shipments/status-badge";
 import { StatusTimeline } from "@/components/shipments/status-timeline";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EmailViewer } from "@/components/shipments/email-viewer";
-import { ArrowLeft, FileText, AlertTriangle, FlaskConical } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import { ArrowLeft, FileText, AlertTriangle, FlaskConical, Mail, Paperclip, FileDown } from "lucide-react";
 
 interface ShipmentDetail {
   id: string;
@@ -88,11 +94,28 @@ interface ShipmentDetail {
   } | null;
 }
 
+interface EmailSheetDetail {
+  id: string;
+  subject: string | null;
+  fromAddress: string | null;
+  receivedAt: string | null;
+  processedAt: string;
+  status: string;
+  errors: string | null;
+  emailBody: string | null;
+  emailBodyHtml: string | null;
+  attachments: { name: string; contentType?: string; index: number }[];
+  shipments: { id: string; aangiftenummer: string; awb: string | null; status: string }[];
+}
+
 export default function ShipmentDetailPage() {
   const params = useParams();
   const { t } = useTranslation();
   const [shipment, setShipment] = useState<ShipmentDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [emailSheet, setEmailSheet] = useState<EmailSheetDetail | null>(null);
+  const [emailSheetOpen, setEmailSheetOpen] = useState(false);
+  const [loadingEmail, setLoadingEmail] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -102,6 +125,16 @@ export default function ShipmentDetailPage() {
         .finally(() => setLoading(false));
     }
   }, [params.id]);
+
+  async function openEmailDetail(emailId: string) {
+    setLoadingEmail(true);
+    setEmailSheetOpen(true);
+    const res = await fetch(`/api/email-ingestions/${emailId}`);
+    if (res.ok) {
+      setEmailSheet(await res.json());
+    }
+    setLoadingEmail(false);
+  }
 
   if (loading) {
     return (
@@ -331,14 +364,38 @@ export default function ShipmentDetailPage() {
 
       {/* Original Email */}
       {shipment.emailIngestion && (
-        <EmailViewer
-          subject={shipment.emailIngestion.subject}
-          fromAddress={shipment.emailIngestion.fromAddress}
-          receivedAt={shipment.emailIngestion.receivedAt}
-          emailBody={shipment.emailIngestion.emailBody}
-          emailBodyHtml={shipment.emailIngestion.emailBodyHtml}
-          attachmentCount={shipment.emailIngestion.attachmentCount}
-        />
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Mail className="h-4 w-4 text-gray-600" />
+              {t("email.originalEmail")}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <button
+              onClick={() => openEmailDetail(shipment.emailIngestion!.id)}
+              className="w-full rounded-md border bg-white p-3 text-left hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium text-sm truncate">{shipment.emailIngestion.subject || "-"}</div>
+                  <div className="text-xs text-gray-500 mt-0.5">
+                    {shipment.emailIngestion.fromAddress || "-"}
+                    {shipment.emailIngestion.receivedAt && (
+                      <> &middot; {new Date(shipment.emailIngestion.receivedAt).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}</>
+                    )}
+                  </div>
+                </div>
+                {shipment.emailIngestion.attachmentCount > 0 && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 shrink-0">
+                    <Paperclip className="h-3 w-3" />
+                    {shipment.emailIngestion.attachmentCount}
+                  </span>
+                )}
+              </div>
+            </button>
+          </CardContent>
+        </Card>
       )}
 
       {/* Status Timeline */}
@@ -350,6 +407,106 @@ export default function ShipmentDetailPage() {
           <StatusTimeline history={shipment.statusHistory} />
         </CardContent>
       </Card>
+      {/* Email detail sheet */}
+      <Sheet
+        open={emailSheetOpen}
+        onOpenChange={(open) => {
+          setEmailSheetOpen(open);
+          if (!open) setEmailSheet(null);
+        }}
+      >
+        <SheetContent side="right" className="sm:max-w-[50vw] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              {t("email.originalEmail")}
+            </SheetTitle>
+            <SheetDescription>
+              {emailSheet?.subject || ""}
+            </SheetDescription>
+          </SheetHeader>
+
+          {loadingEmail ? (
+            <div className="p-4 text-center text-gray-500">Loading...</div>
+          ) : emailSheet ? (
+            <div className="space-y-4 px-4 pb-4">
+              {/* Email metadata */}
+              <div className="rounded-md bg-gray-50 p-3 text-sm space-y-1">
+                <div>
+                  <span className="text-gray-500">{t("email.from")}</span>{" "}
+                  <span className="font-medium">{emailSheet.fromAddress || "-"}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">{t("email.date")}</span>{" "}
+                  {emailSheet.receivedAt
+                    ? new Date(emailSheet.receivedAt).toLocaleString("nl-NL")
+                    : emailSheet.processedAt
+                      ? new Date(emailSheet.processedAt).toLocaleString("nl-NL")
+                      : "-"}
+                </div>
+                <div>
+                  <span className="text-gray-500">{t("email.subject")}</span>{" "}
+                  <span className="font-medium">{emailSheet.subject || "-"}</span>
+                </div>
+              </div>
+
+              {/* Attachments */}
+              {emailSheet.attachments.length > 0 && (
+                <div className="rounded-md border p-3">
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-1.5">
+                    <Paperclip className="h-3.5 w-3.5" />
+                    {t("email.attachments")} {emailSheet.attachments.length}{" "}
+                    {emailSheet.attachments.length !== 1 ? t("email.files") : t("email.file")}
+                  </h4>
+                  <div className="space-y-1.5">
+                    {emailSheet.attachments.map((att) => (
+                      <a
+                        key={att.index}
+                        href={`/api/email-ingestions/${emailSheet.id}/attachment/${att.index}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 rounded-md border bg-white px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
+                      >
+                        <FileDown className="h-4 w-4 text-gray-500 shrink-0" />
+                        <span className="truncate flex-1">{att.name}</span>
+                        <span className="text-xs text-gray-400 shrink-0">
+                          {att.contentType === "application/pdf" ? "PDF" : att.contentType || ""}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Errors */}
+              {emailSheet.errors && (
+                <div className="rounded-md border border-amber-200 bg-amber-50 p-3">
+                  <h4 className="text-sm font-medium text-amber-800 mb-2">{t("emailLog.errorDetails")}</h4>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-amber-700">
+                    {emailSheet.errors.split(";").map((err, i) => (
+                      <li key={i}>{err.trim()}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Email body */}
+              {emailSheet.emailBodyHtml ? (
+                <div
+                  className="prose prose-sm max-w-none rounded-md border p-4"
+                  dangerouslySetInnerHTML={{ __html: emailSheet.emailBodyHtml }}
+                />
+              ) : emailSheet.emailBody ? (
+                <pre className="whitespace-pre-wrap rounded-md border bg-gray-50 p-4 text-sm">
+                  {emailSheet.emailBody}
+                </pre>
+              ) : (
+                <p className="text-sm text-gray-500">{t("email.noBody")}</p>
+              )}
+            </div>
+          ) : null}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
