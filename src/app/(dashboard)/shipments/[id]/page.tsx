@@ -418,7 +418,7 @@ export default function ShipmentDetailPage() {
           if (!open) setEmailSheet(null);
         }}
       >
-        <SheetContent side="right" className="w-[50vw] max-w-[50vw] overflow-y-auto">
+        <SheetContent side="right" className="!w-[50vw] !max-w-[50vw] overflow-y-auto">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
