@@ -119,7 +119,9 @@
     "previous": "Vorige",
     "next": "Volgende",
     "errorDetails": "Foutdetails",
-    "linkedShipments": "{count} zending(en)"
+    "linkedShipments": "{count} zending(en)",
+    "viewEmail": "E-mail bekijken",
+    "downloadAttachment": "Downloaden"
   },
   "settings": {
     "title": "Instellingen",

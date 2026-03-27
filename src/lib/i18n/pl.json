@@ -119,7 +119,9 @@
     "previous": "Poprzednia",
     "next": "Nastepna",
     "errorDetails": "Szczegoly bledu",
-    "linkedShipments": "{count} przesylka(i)"
+    "linkedShipments": "{count} przesylka(i)",
+    "viewEmail": "Zobacz e-mail",
+    "downloadAttachment": "Pobierz"
   },
   "settings": {
     "title": "Ustawienia",

@@ -119,7 +119,9 @@
     "previous": "Previous",
     "next": "Next",
     "errorDetails": "Error details",
-    "linkedShipments": "{count} shipment(s)"
+    "linkedShipments": "{count} shipment(s)",
+    "viewEmail": "View email",
+    "downloadAttachment": "Download"
   },
   "settings": {
     "title": "Settings",
