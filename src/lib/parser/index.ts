@@ -24,11 +24,19 @@ async function extractTextFromPdf(buffer: Buffer): Promise<string> {
   for (let i = 1; i <= doc.numPages; i++) {
     const page = await doc.getPage(i);
     const content = await page.getTextContent();
-    const text = content.items
-      .filter((item) => "str" in item)
-      .map((item) => (item as { str: string }).str)
-      .join(" ");
-    pages.push(text);
+    let currentLine = "";
+    const lines: string[] = [];
+    for (const item of content.items) {
+      if (!("str" in item)) continue;
+      const textItem = item as { str: string; hasEOL?: boolean };
+      currentLine += textItem.str;
+      if (textItem.hasEOL) {
+        lines.push(currentLine.trim());
+        currentLine = "";
+      }
+    }
+    if (currentLine.trim()) lines.push(currentLine.trim());
+    pages.push(lines.join("\n"));
   }
   return pages.join("\n");
 }
