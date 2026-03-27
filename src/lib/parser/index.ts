@@ -1,4 +1,4 @@
-import pdfParse from "pdf-parse";
+import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { detectDocumentType } from "./detect";
 import { parseMededeling } from "./mededeling";
 import { parseInspectie } from "./inspectie";
@@ -14,9 +14,27 @@ export interface ParseResult {
   error?: string;
 }
 
+async function extractTextFromPdf(buffer: Buffer): Promise<string> {
+  const doc = await getDocument({
+    data: new Uint8Array(buffer),
+    useSystemFonts: true,
+    verbosity: 0, // suppress warnings about standardFontDataUrl
+  }).promise;
+  const pages: string[] = [];
+  for (let i = 1; i <= doc.numPages; i++) {
+    const page = await doc.getPage(i);
+    const content = await page.getTextContent();
+    const text = content.items
+      .filter((item) => "str" in item)
+      .map((item) => (item as { str: string }).str)
+      .join(" ");
+    pages.push(text);
+  }
+  return pages.join("\n");
+}
+
 export async function parsePdfBuffer(buffer: Buffer, emailIngestionId?: string): Promise<ParseResult> {
-  const data = await pdfParse(buffer);
-  const text = data.text;
+  const text = await extractTextFromPdf(buffer);
   const docType = detectDocumentType(text);
 
   switch (docType) {
