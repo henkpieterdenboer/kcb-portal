@@ -10,9 +10,9 @@ export const emailIngestionSchema = z.object({
     z.object({
       name: z.string(),
       contentType: z.string().optional(),
-      contentBytes: z.string(), // base64
-    })
-  ),
+      contentBytes: z.string().optional(), // base64 - optional for shared mailbox triggers
+    }).passthrough()
+  ).optional().default([]),
 });
 
 export type EmailIngestionInput = z.infer<typeof emailIngestionSchema>;

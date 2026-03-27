@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
   const pdfAttachments = attachments.filter(
     (a) => a.name.toLowerCase().endsWith(".pdf")
   );
+  const parsableAttachments = pdfAttachments.filter((a) => a.contentBytes);
 
   const emailIngestion = await prisma.emailIngestion.create({
     data: {
@@ -43,9 +44,14 @@ export async function POST(request: NextRequest) {
   const results: ParseResult[] = [];
   const errors: string[] = [];
 
-  for (const attachment of pdfAttachments) {
+  // Note: attachments without contentBytes are skipped (shared mailbox triggers may not include content)
+  if (pdfAttachments.length > 0 && parsableAttachments.length === 0) {
+    errors.push("PDF attachments found but none have contentBytes - use 'Get Attachment' action in Power Automate to include file content");
+  }
+
+  for (const attachment of parsableAttachments) {
     try {
-      const buffer = Buffer.from(attachment.contentBytes, "base64");
+      const buffer = Buffer.from(attachment.contentBytes!, "base64");
       const result = await parsePdfBuffer(buffer, emailIngestion.id);
       results.push(result);
       if (!result.success && result.error) {
