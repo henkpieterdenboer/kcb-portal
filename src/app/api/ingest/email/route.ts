@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { emailIngestionSchema } from "@/lib/validations";
 import { prisma } from "@/lib/db";
 import { processEmailAttachments } from "@/lib/ingest/process-attachments";
+import { parseEmailBody } from "@/lib/parser";
 
 export async function POST(request: NextRequest) {
   // Verify API key
@@ -43,6 +44,16 @@ export async function POST(request: NextRequest) {
     emailIngestion.id,
     attachments
   );
+
+  // Also parse email body for structured fields (KCB planning/notification emails)
+  if (emailBody) {
+    try {
+      const bodyResult = await parseEmailBody(emailBody, emailIngestion.id);
+      if (bodyResult) results.push(bodyResult);
+    } catch (err) {
+      console.error("Failed to parse email body:", err);
+    }
+  }
 
   const shipments = results
     .filter((r) => r.success && r.aangiftenummer)

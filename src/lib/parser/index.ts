@@ -343,3 +343,55 @@ async function processBlokkade(text: string, emailIngestionId?: string): Promise
 
   return { type: "BLOKKADE", aangiftenummer: data.aangiftenummer || undefined, success: true };
 }
+
+/**
+ * Parse structured fields from email body text and update the linked shipment.
+ * KCB planning/notification emails contain fields like Aangiftenummer, Awb, etc.
+ * in the email body rather than in PDF attachments.
+ */
+export async function parseEmailBody(
+  emailBody: string,
+  emailIngestionId: string
+): Promise<ParseResult | null> {
+  // Extract aangiftenummer from email body
+  const aanMatch = emailBody.match(/Aangiftenummer\s*:\s*(.+?)(?:\n|$)/i);
+  if (!aanMatch) return null;
+
+  const aangiftenummer = aanMatch[1].trim();
+  const shipment = await prisma.shipment.findUnique({
+    where: { aangiftenummer },
+    select: { id: true, awb: true, bol: true, exporteur: true, importeur: true },
+  });
+
+  if (!shipment) return null;
+
+  // Extract fields from body to fill in missing shipment data
+  function extractBodyField(label: string): string | null {
+    const regex = new RegExp(`${label}\\s*:\\s*(.+?)(?:\\n|$)`, "i");
+    const m = emailBody.match(regex);
+    return m ? m[1].trim() || null : null;
+  }
+
+  const updateData: Record<string, unknown> = {
+    emailIngestions: { connect: { id: emailIngestionId } },
+  };
+
+  const awb = extractBodyField("Awb");
+  if (awb && !shipment.awb) updateData.awb = awb;
+
+  const bol = extractBodyField("Bol");
+  if (bol && !shipment.bol) updateData.bol = bol;
+
+  const exporteur = extractBodyField("Exporteur");
+  if (exporteur && !shipment.exporteur) updateData.exporteur = exporteur;
+
+  const importeur = extractBodyField("Importeur");
+  if (importeur && !shipment.importeur) updateData.importeur = importeur;
+
+  await prisma.shipment.update({
+    where: { id: shipment.id },
+    data: updateData,
+  });
+
+  return { type: "EMAIL_BODY", aangiftenummer, success: true };
+}
