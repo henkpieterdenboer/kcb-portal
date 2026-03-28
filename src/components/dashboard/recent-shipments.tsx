@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import {
   Table,
@@ -23,17 +24,31 @@ interface ShipmentRow {
   subShipments: { botanischeNaam: string }[];
 }
 
-export function RecentShipments({ shipments }: { shipments: ShipmentRow[] }) {
+interface RecentShipmentsProps {
+  shipments: ShipmentRow[];
+  statusFilter?: string | null;
+}
+
+export function RecentShipments({ shipments, statusFilter }: RecentShipmentsProps) {
   const { t } = useTranslation();
+
+  const filtered = useMemo(() => {
+    if (!statusFilter) return shipments;
+    return shipments.filter((s) => s.status === statusFilter);
+  }, [shipments, statusFilter]);
+
   return (
     <div className="rounded-lg border bg-white">
-      <div className="border-b px-4 py-3">
-        <h3 className="font-semibold">{t("dashboard.recentShipments")}</h3>
+      <div className="border-b px-4 py-3 flex items-center justify-between">
+        <h3 className="font-semibold">{t("dashboard.openShipments")}</h3>
+        {statusFilter && (
+          <StatusBadge status={statusFilter} />
+        )}
       </div>
 
       {/* Mobile card view */}
       <div className="space-y-0 divide-y md:hidden">
-        {shipments.map((s) => (
+        {filtered.map((s) => (
           <Link
             key={s.id}
             href={`/shipments/${s.id}`}
@@ -54,7 +69,7 @@ export function RecentShipments({ shipments }: { shipments: ShipmentRow[] }) {
             </div>
           </Link>
         ))}
-        {shipments.length === 0 && (
+        {filtered.length === 0 && (
           <div className="py-8 text-center text-sm text-gray-500">{t("shipments.noShipments")}</div>
         )}
       </div>
@@ -73,7 +88,7 @@ export function RecentShipments({ shipments }: { shipments: ShipmentRow[] }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {shipments.map((s) => (
+            {filtered.map((s) => (
               <TableRow key={s.id} className="cursor-pointer hover:bg-gray-50">
                 <TableCell>
                   <Link href={`/shipments/${s.id}`} className="font-mono text-sm font-medium text-blue-600 hover:underline">
@@ -93,7 +108,7 @@ export function RecentShipments({ shipments }: { shipments: ShipmentRow[] }) {
                 </TableCell>
               </TableRow>
             ))}
-            {shipments.length === 0 && (
+            {filtered.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="py-8 text-center text-gray-500">
                   {t("shipments.noShipments")}

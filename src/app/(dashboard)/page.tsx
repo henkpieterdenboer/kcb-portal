@@ -54,6 +54,7 @@ export default function DashboardPage() {
   const { t } = useTranslation();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pipelineFilter, setPipelineFilter] = useState<string | null>(null);
 
   const fetchData = useCallback(() => {
     setLoading(true);
@@ -138,11 +139,11 @@ export default function DashboardPage() {
       {/* Active Status Pipeline */}
       <div className="rounded-lg border bg-white p-4">
         <h3 className="mb-4 font-semibold">{t("dashboard.activePipeline")}</h3>
-        <StatusPipeline totals={data.totals} />
+        <StatusPipeline totals={data.totals} selectedStatus={pipelineFilter} onStatusClick={setPipelineFilter} />
       </div>
 
       {/* Recent active shipments */}
-      <RecentShipments shipments={data.recentShipments} />
+      <RecentShipments shipments={data.recentShipments} statusFilter={pipelineFilter} />
     </div>
   );
 }

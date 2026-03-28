@@ -30,7 +30,7 @@
     "todayArrivals": "Today's Arrivals",
     "noInspections": "No inspections scheduled for today",
     "noArrivals": "No arrivals expected today",
-    "recentShipments": "Recent Shipments"
+    "openShipments": "Open Shipments"
   },
   "shipments": {
     "activeTitle": "Active Shipments",
