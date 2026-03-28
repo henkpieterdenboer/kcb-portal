@@ -49,12 +49,14 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
     { name: t("nav.dashboard"), href: "/", icon: LayoutDashboard },
     { name: t("nav.shipments"), href: "/shipments", icon: Ship },
     { name: t("nav.archive"), href: "/shipments/archive", icon: Archive },
-    { name: t("nav.settings"), href: "/settings", icon: Settings },
   ];
 
-  const adminNav = [
-    { name: t("nav.users"), href: "/settings/users", icon: Users },
-    { name: t("nav.emailLog"), href: "/settings/emails", icon: Mail },
+  const bottomNav = [
+    { name: t("nav.settings"), href: "/settings", icon: Settings },
+    ...(isAdmin ? [
+      { name: t("nav.users"), href: "/settings/users", icon: Users },
+      { name: t("nav.emailLog"), href: "/settings/emails", icon: Mail },
+    ] : []),
   ];
 
   function isActive(href: string) {
@@ -139,17 +141,12 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
 
         {/* Bottom section */}
         <div className="border-t px-3 py-3 space-y-1">
-          {/* Admin links */}
-          {isAdmin && (
-            <>
-              {adminNav.map((item) => (
-                <NavLink key={item.href} item={item} />
-              ))}
-            </>
-          )}
+          {bottomNav.map((item) => (
+            <NavLink key={item.href} item={item} />
+          ))}
 
           {/* User account dropdown */}
-          <div className={isAdmin ? "mt-2 border-t pt-3" : ""}>
+          <div className="mt-2 border-t pt-3">
             <DropdownMenu>
               <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-gray-50 transition-colors">
                 <Avatar className="h-8 w-8 shrink-0">
