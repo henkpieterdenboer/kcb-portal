@@ -26,18 +26,18 @@ export function StatusPipeline({ totals, showTerminal = false }: StatusPipelineP
   const statuses = showTerminal ? SHIPMENT_STATUSES : ACTIVE_STATUSES;
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
       {statuses.map((status, i) => (
         <div key={status} className="flex items-center gap-2">
-          <div className="flex flex-col items-center gap-1 rounded-lg border bg-white p-3 shadow-sm">
-            <div className={`h-2 w-16 rounded-full ${stageColors[status]}`} />
-            <span className="text-xs font-medium text-gray-600">
+          <div className="flex w-full flex-col items-center gap-1 rounded-lg border bg-white p-2 sm:p-3 shadow-sm">
+            <div className={`h-1.5 sm:h-2 w-full sm:w-16 rounded-full ${stageColors[status]}`} />
+            <span className="text-[10px] sm:text-xs font-medium text-gray-600 text-center leading-tight">
               {t("status." + status)}
             </span>
-            <span className="text-lg font-bold">{totals[status] || 0}</span>
+            <span className="text-base sm:text-lg font-bold">{totals[status] || 0}</span>
           </div>
           {i < statuses.length - 1 && (
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="hidden sm:block h-4 w-4 text-gray-400 shrink-0" />
           )}
         </div>
       ))}

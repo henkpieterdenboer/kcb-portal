@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Menu } from "lucide-react";
 
 const languages: { value: Language; label: string }[] = [
   { value: "en", label: "EN" },
@@ -17,13 +18,21 @@ const languages: { value: Language; label: string }[] = [
   { value: "pl", label: "PL" },
 ];
 
-export function Header() {
+export function Header({ onMenuToggle }: { onMenuToggle?: () => void } = {}) {
   const { data: session } = useSession();
   const { language, setLanguage } = useTranslation();
 
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-white px-6">
-      <div />
+    <header className="flex h-14 lg:h-16 items-center justify-between border-b bg-white px-4 lg:px-6">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onMenuToggle}
+          className="rounded-md p-2 text-gray-600 hover:bg-gray-100 lg:hidden"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <span className="text-lg font-bold text-gray-900 lg:hidden">KCB Portal</span>
+      </div>
       <div className="flex items-center gap-3">
         <Select value={language} onValueChange={(v) => v && setLanguage(v as Language)}>
           <SelectTrigger className="h-8 w-[70px]">

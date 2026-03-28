@@ -47,7 +47,7 @@ export function KpiCards({ todayArrivals, todayInspections, activeShipments, blo
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       {cards.map((card) => {
         const content = (
           <Card className={card.href ? "transition-colors hover:bg-gray-50 cursor-pointer" : ""}>

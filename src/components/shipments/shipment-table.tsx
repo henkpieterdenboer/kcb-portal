@@ -77,8 +77,9 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px]">
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 sm:gap-3">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
             placeholder={t("shipments.searchPlaceholder")}
@@ -90,28 +91,66 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
             className="pl-9"
           />
         </div>
-        <Select
-          value={searchParams.get("status") || "ALL"}
-          onValueChange={(v) => applyFilters({ status: v === "ALL" ? "" : (v ?? "") })}
-        >
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder={t("shipments.allStatuses")} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">{t("shipments.allStatuses")}</SelectItem>
-            {filterStatuses.map((s) => (
-              <SelectItem key={s} value={s}>
-                {t("status." + s)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button variant="outline" onClick={() => applyFilters({ search })}>
-          {t("shipments.filter")}
-        </Button>
+        <div className="flex gap-2">
+          <Select
+            value={searchParams.get("status") || "ALL"}
+            onValueChange={(v) => applyFilters({ status: v === "ALL" ? "" : (v ?? "") })}
+          >
+            <SelectTrigger className="flex-1 sm:w-[200px]">
+              <SelectValue placeholder={t("shipments.allStatuses")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">{t("shipments.allStatuses")}</SelectItem>
+              {filterStatuses.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {t("status." + s)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button variant="outline" onClick={() => applyFilters({ search })}>
+            {t("shipments.filter")}
+          </Button>
+        </div>
       </div>
 
-      <div className="rounded-lg border bg-white">
+      {/* Mobile card view */}
+      <div className="space-y-2 md:hidden">
+        {shipments.map((s) => (
+          <Link
+            key={s.id}
+            href={`/shipments/${s.id}`}
+            className="block rounded-lg border bg-white p-3 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="font-mono text-sm font-medium text-blue-600">
+                  {s.awb || s.aangiftenummer}
+                </div>
+                <div className="mt-0.5 text-sm text-gray-600 truncate">
+                  {s.exporteur || "-"}
+                </div>
+              </div>
+              <StatusBadge status={s.status} />
+            </div>
+            <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
+              {s.landVanOorsprong && <span>{s.landVanOorsprong}</span>}
+              <span>{new Date(s.updatedAt).toLocaleDateString("nl-NL")}</span>
+            </div>
+            {s.subShipments.length > 0 && (
+              <div className="mt-1 text-xs text-gray-400 truncate">
+                {s.subShipments.map((sub) => sub.botanischeNaam).join(", ")}
+              </div>
+            )}
+          </Link>
+        ))}
+        {shipments.length === 0 && (
+          <div className="py-8 text-center text-gray-500">{t("shipments.noShipments")}</div>
+        )}
+      </div>
+
+      {/* Desktop table view */}
+      <div className="hidden md:block rounded-lg border bg-white">
         <Table>
           <TableHeader>
             <TableRow>
@@ -161,8 +200,8 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
       </div>
 
       {pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-600">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs sm:text-sm text-gray-600">
             {t("shipments.showing", {
               start: (pagination.page - 1) * pagination.pageSize + 1,
               end: Math.min(pagination.page * pagination.pageSize, pagination.total),

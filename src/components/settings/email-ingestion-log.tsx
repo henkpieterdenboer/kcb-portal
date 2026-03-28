@@ -168,8 +168,8 @@ export function EmailIngestionLog() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative flex-1 min-w-[200px]">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 sm:gap-3">
+            <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 placeholder={t("emailLog.search")}
@@ -188,7 +188,7 @@ export function EmailIngestionLog() {
                 setPage(1);
               }}
             >
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="sm:w-[200px]">
                 <SelectValue placeholder={t("emailLog.allStatuses")} />
               </SelectTrigger>
               <SelectContent>
@@ -202,7 +202,52 @@ export function EmailIngestionLog() {
             </Select>
           </div>
 
-          <div className="rounded-md border">
+          {/* Mobile card view */}
+          <div className="space-y-2 md:hidden">
+            {ingestions.map((ing) => (
+              <button
+                key={ing.id}
+                onClick={() => openEmailDetail(ing.id)}
+                className="w-full rounded-lg border bg-white p-3 text-left hover:bg-gray-50 active:bg-gray-100 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium truncate">{ing.subject || "-"}</div>
+                    <div className="text-xs text-gray-500 mt-0.5 truncate">{ing.fromAddress || "-"}</div>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {ing.attachmentCount > 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">
+                        <Paperclip className="h-3 w-3" />
+                        {ing.attachmentCount}
+                      </span>
+                    )}
+                    {statusBadge(ing.status)}
+                  </div>
+                </div>
+                <div className="mt-1.5 flex items-center gap-3 text-xs text-gray-400">
+                  <span>
+                    {new Date(ing.processedAt).toLocaleString("nl-NL", {
+                      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
+                    })}
+                  </span>
+                  {ing.shipments.length > 0 && (
+                    <span className="text-blue-600">
+                      {ing.shipments.length} {ing.shipments.length === 1 ? "shipment" : "shipments"}
+                    </span>
+                  )}
+                  {ing.errors && <span className="text-amber-600">{t("emailLog.errors")}</span>}
+                </div>
+              </button>
+            ))}
+            {loading && <div className="py-8 text-center text-gray-500">Loading...</div>}
+            {!loading && ingestions.length === 0 && (
+              <div className="py-8 text-center text-gray-500">{t("emailLog.noEmails")}</div>
+            )}
+          </div>
+
+          {/* Desktop table view */}
+          <div className="hidden md:block rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -315,8 +360,8 @@ export function EmailIngestionLog() {
           </div>
 
           {pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-600">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs sm:text-sm text-gray-600">
                 {t("emailLog.showing", {
                   start: (pagination.page - 1) * pagination.pageSize + 1,
                   end: Math.min(
@@ -357,7 +402,7 @@ export function EmailIngestionLog() {
           if (!open) setSelectedEmail(null);
         }}
       >
-        <SheetContent side="right" className="!w-[50vw] !max-w-[50vw] overflow-y-auto">
+        <SheetContent side="right" className="!w-full sm:!w-[85vw] md:!w-[50vw] !max-w-full sm:!max-w-[85vw] md:!max-w-[50vw] overflow-y-auto">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <Mail className="h-4 w-4" />

@@ -53,26 +53,33 @@ export function TodayInspections({ shipments }: { shipments: InspectionShipment[
                 <Link
                   key={s.id}
                   href={`/shipments/${s.id}`}
-                  className="flex items-center justify-between rounded-md border p-3 transition-colors hover:bg-gray-50"
+                  className="block rounded-md border p-3 transition-colors hover:bg-gray-50 active:bg-gray-100"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="w-14 shrink-0 text-center text-sm font-semibold text-violet-600">
+                  <div className="flex items-start gap-3">
+                    <span className="w-12 sm:w-14 shrink-0 text-center text-sm font-semibold text-violet-600">
                       {time || "--:--"}
                     </span>
-                    <div>
-                      <span className="font-mono text-sm font-medium">
-                        {s.awb || s.aangiftenummer}
-                      </span>
-                      <span className="ml-2 text-sm text-gray-500">
-                        {s.exporteur}
-                      </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <span className="font-mono text-sm font-medium">
+                            {s.awb || s.aangiftenummer}
+                          </span>
+                          <span className="ml-2 text-sm text-gray-500 hidden sm:inline">
+                            {s.exporteur}
+                          </span>
+                          <div className="text-sm text-gray-500 truncate sm:hidden">
+                            {s.exporteur}
+                          </div>
+                        </div>
+                        <StatusBadge status={s.status} />
+                      </div>
+                      {s.subShipments.length > 0 && (
+                        <div className="mt-0.5 text-xs text-gray-400 truncate">
+                          {s.subShipments.map((sub) => sub.botanischeNaam).join(", ")}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500">
-                      {s.subShipments.map((sub) => sub.botanischeNaam).join(", ")}
-                    </span>
-                    <StatusBadge status={s.status} />
                   </div>
                 </Link>
               );

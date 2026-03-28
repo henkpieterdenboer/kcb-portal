@@ -8,7 +8,7 @@ import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n/context";
 
-export function Sidebar() {
+export function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
   const pathname = usePathname();
   const { t } = useTranslation();
   const { data: session } = useSession();
@@ -46,6 +46,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onNavigate}
               className={cn(
                 "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 isActive
@@ -61,7 +62,7 @@ export function Sidebar() {
       </nav>
       <div className="border-t px-3 py-4">
         <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
+          onClick={() => { onNavigate?.(); signOut({ callbackUrl: "/login" }); }}
           className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
         >
           <LogOut className="h-5 w-5" />

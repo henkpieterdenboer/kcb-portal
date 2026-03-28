@@ -37,22 +37,27 @@ export function TodayArrivals({ shipments }: { shipments: ArrivalShipment[] }) {
               <Link
                 key={s.id}
                 href={`/shipments/${s.id}`}
-                className="flex items-center justify-between rounded-md border p-3 transition-colors hover:bg-gray-50"
+                className="block rounded-md border p-3 transition-colors hover:bg-gray-50 active:bg-gray-100"
               >
-                <div>
-                  <span className="font-mono text-sm font-medium">
-                    {s.awb || s.aangiftenummer}
-                  </span>
-                  <span className="ml-2 text-sm text-gray-500">
-                    {s.exporteur}
-                  </span>
-                  {s.landVanOorsprong && (
-                    <span className="ml-2 text-xs text-gray-400">
-                      ({s.landVanOorsprong})
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <span className="font-mono text-sm font-medium">
+                      {s.awb || s.aangiftenummer}
                     </span>
-                  )}
+                    <span className="ml-2 text-sm text-gray-500 hidden sm:inline">
+                      {s.exporteur}
+                    </span>
+                    <div className="text-sm text-gray-500 truncate sm:hidden">
+                      {s.exporteur}
+                    </div>
+                    {s.landVanOorsprong && (
+                      <span className="ml-0 sm:ml-2 text-xs text-gray-400">
+                        ({s.landVanOorsprong})
+                      </span>
+                    )}
+                  </div>
+                  <StatusBadge status={s.status} />
                 </div>
-                <StatusBadge status={s.status} />
               </Link>
             ))}
           </div>

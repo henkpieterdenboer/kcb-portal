@@ -108,7 +108,7 @@ export default function DashboardPage() {
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
-        <h2 className="text-2xl font-bold">{dateString}</h2>
+        <h2 className="text-lg sm:text-2xl font-bold">{dateString}</h2>
         <button
           onClick={() => {
             const next = new Date(currentDate);

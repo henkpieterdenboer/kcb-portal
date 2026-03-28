@@ -1,11 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { TestBanner } from "@/components/layout/test-banner";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Sheet,
+  SheetContent,
+} from "@/components/ui/sheet";
 
 export default function DashboardLayout({
   children,
@@ -14,6 +19,7 @@ export default function DashboardLayout({
 }) {
   const { status } = useSession();
   const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   if (status === "loading") {
     return (
@@ -32,10 +38,19 @@ export default function DashboardLayout({
     <div className="flex h-screen flex-col">
       <TestBanner />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
+        {/* Desktop sidebar */}
+        <div className="hidden lg:block">
+          <Sidebar />
+        </div>
+        {/* Mobile sidebar */}
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <SheetContent side="left" className="w-64 p-0">
+            <Sidebar onNavigate={() => setMobileMenuOpen(false)} />
+          </SheetContent>
+        </Sheet>
         <div className="flex flex-1 flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 overflow-y-auto bg-gray-50 p-6">{children}</main>
+          <Header onMenuToggle={() => setMobileMenuOpen(true)} />
+          <main className="flex-1 overflow-y-auto bg-gray-50 p-4 lg:p-6">{children}</main>
         </div>
       </div>
     </div>

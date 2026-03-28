@@ -161,10 +161,10 @@ export default function ShipmentDetailPage() {
       </div>
 
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h2 className="text-2xl font-bold font-mono">{shipment.aangiftenummer}</h2>
-          <p className="text-gray-500">{shipment.exporteur}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold font-mono break-all">{shipment.aangiftenummer}</h2>
+          <p className="text-gray-500 truncate">{shipment.exporteur}</p>
         </div>
         <StatusBadge status={shipment.status} />
       </div>
@@ -231,39 +231,56 @@ export default function ShipmentDetailPage() {
           <CardHeader>
             <CardTitle className="text-base">{t("detail.subShipments")} ({shipment.subShipments.length})</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("table.product")}</TableHead>
-                  <TableHead>{t("table.origin")}</TableHead>
-                  <TableHead className="text-right">{t("detail.colli")}</TableHead>
-                  <TableHead>{t("detail.type")}</TableHead>
-                  <TableHead className="text-right">{t("detail.pieces")}</TableHead>
-                  <TableHead>{t("detail.taric")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {shipment.subShipments.map((sub) => (
-                  <TableRow key={sub.id}>
-                    <TableCell className="font-medium">{sub.botanischeNaam}</TableCell>
-                    <TableCell>{sub.landVanOorsprong || "-"}</TableCell>
-                    <TableCell className="text-right">{sub.aantalColli ?? "-"}</TableCell>
-                    <TableCell>{sub.soortColli || "-"}</TableCell>
-                    <TableCell className="text-right">
-                      {sub.aantalStuks?.toLocaleString() ?? "-"}
-                    </TableCell>
-                    <TableCell className="font-mono text-sm">{sub.taricCode || "-"}</TableCell>
+          <CardContent className="p-0 sm:p-6">
+            {/* Mobile card view */}
+            <div className="space-y-2 p-4 sm:hidden">
+              {shipment.subShipments.map((sub) => (
+                <div key={sub.id} className="rounded-md border p-3 text-sm">
+                  <div className="font-medium">{sub.botanischeNaam}</div>
+                  <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+                    {sub.landVanOorsprong && <span>{sub.landVanOorsprong}</span>}
+                    {sub.aantalColli != null && <span>{sub.aantalColli} colli</span>}
+                    {sub.aantalStuks != null && <span>{sub.aantalStuks.toLocaleString()} pcs</span>}
+                    {sub.taricCode && <span className="font-mono">{sub.taricCode}</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Desktop table view */}
+            <div className="hidden sm:block overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("table.product")}</TableHead>
+                    <TableHead>{t("table.origin")}</TableHead>
+                    <TableHead className="text-right">{t("detail.colli")}</TableHead>
+                    <TableHead>{t("detail.type")}</TableHead>
+                    <TableHead className="text-right">{t("detail.pieces")}</TableHead>
+                    <TableHead>{t("detail.taric")}</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {shipment.subShipments.map((sub) => (
+                    <TableRow key={sub.id}>
+                      <TableCell className="font-medium">{sub.botanischeNaam}</TableCell>
+                      <TableCell>{sub.landVanOorsprong || "-"}</TableCell>
+                      <TableCell className="text-right">{sub.aantalColli ?? "-"}</TableCell>
+                      <TableCell>{sub.soortColli || "-"}</TableCell>
+                      <TableCell className="text-right">
+                        {sub.aantalStuks?.toLocaleString() ?? "-"}
+                      </TableCell>
+                      <TableCell className="font-mono text-sm">{sub.taricCode || "-"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       )}
 
       {/* Reports */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         {/* Inspection Reports */}
         {shipment.inspectionReports.length > 0 && (
           <Card>
@@ -419,7 +436,7 @@ export default function ShipmentDetailPage() {
           if (!open) setEmailSheet(null);
         }}
       >
-        <SheetContent side="right" className="!w-[50vw] !max-w-[50vw] overflow-y-auto">
+        <SheetContent side="right" className="!w-full sm:!w-[85vw] md:!w-[50vw] !max-w-full sm:!max-w-[85vw] md:!max-w-[50vw] overflow-y-auto">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
