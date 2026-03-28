@@ -1,4 +1,5 @@
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { Prisma } from "@prisma/client";
 import { detectDocumentType } from "./detect";
 import { parseMededeling } from "./mededeling";
 import { parseInspectie } from "./inspectie";
@@ -6,6 +7,23 @@ import { parseMonster } from "./monster";
 import { parseBlokkade } from "./blokkade";
 import { prisma } from "../db";
 import { normalizeStatus } from "@/types";
+
+/**
+ * Wrapper around prisma.shipment.upsert that retries on unique constraint
+ * race conditions (P2002). When two concurrent requests both try to create
+ * the same shipment, one will fail — retry converts the create to an update.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function shipmentUpsert(args: Prisma.ShipmentUpsertArgs): Promise<any> {
+  try {
+    return await prisma.shipment.upsert(args as any);
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+      return await prisma.shipment.upsert(args as any);
+    }
+    throw err;
+  }
+}
 
 export interface ParseResult {
   type: string;
@@ -67,7 +85,7 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
     ? { emailIngestions: { connect: { id: emailIngestionId } } }
     : {};
 
-  const shipment = await prisma.shipment.upsert({
+  const shipment = await shipmentUpsert({
     where: { aangiftenummer: data.aangiftenummer },
     create: {
       aangiftenummer: data.aangiftenummer,
@@ -154,7 +172,7 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
       ? { emailIngestions: { connect: { id: emailIngestionId } } }
       : {};
 
-    const shipment = await prisma.shipment.upsert({
+    const shipment = await shipmentUpsert({
       where: { aangiftenummer: data.aanvraagnummer },
       create: {
         aangiftenummer: data.aanvraagnummer,
@@ -257,7 +275,7 @@ async function processMonster(text: string, emailIngestionId?: string): Promise<
       ? { emailIngestions: { connect: { id: emailIngestionId } } }
       : {};
 
-    const shipment = await prisma.shipment.upsert({
+    const shipment = await shipmentUpsert({
       where: { aangiftenummer: data.aanvraagnummer },
       create: {
         aangiftenummer: data.aanvraagnummer,
@@ -314,7 +332,7 @@ async function processBlokkade(text: string, emailIngestionId?: string): Promise
       ? { emailIngestions: { connect: { id: emailIngestionId } } }
       : {};
 
-    const shipment = await prisma.shipment.upsert({
+    const shipment = await shipmentUpsert({
       where: { aangiftenummer: data.aangiftenummer },
       create: {
         aangiftenummer: data.aangiftenummer,
@@ -334,7 +352,7 @@ async function processBlokkade(text: string, emailIngestionId?: string): Promise
 
     await prisma.statusHistory.create({
       data: {
-        shipmentId,
+        shipmentId: shipment.id,
         status: "GEBLOKKEERD",
         source: "BLOKKADERAPPORT",
         details: `Blockade: ${data.reden || "Unknown reason"}`,
@@ -402,7 +420,7 @@ export async function parseEmailBody(
   const emailConnect = { emailIngestions: { connect: { id: emailIngestionId } } };
 
   // Upsert: create shipment if it doesn't exist yet (planning email before mededeling)
-  const shipment = await prisma.shipment.upsert({
+  const shipment = await shipmentUpsert({
     where: { aangiftenummer },
     create: {
       aangiftenummer,
