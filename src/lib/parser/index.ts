@@ -197,12 +197,18 @@ async function processInspectie(text: string): Promise<ParseResult> {
     },
   });
 
-  // Update shipment status based on inspection result
+  // Update shipment status and fill in AWB/BOL if missing
   if (shipmentId) {
     const newStatus = normalizeStatus(overallStatus);
+    const shipmentUpdate: Record<string, string> = { status: newStatus };
+    if (data.awbNummer) {
+      const current = await prisma.shipment.findUnique({ where: { id: shipmentId }, select: { awb: true, bol: true } });
+      if (!current?.awb) shipmentUpdate.awb = data.awbNummer;
+      if (!current?.bol && data.bolNummer) shipmentUpdate.bol = data.bolNummer;
+    }
     await prisma.shipment.update({
       where: { id: shipmentId },
-      data: { status: newStatus },
+      data: shipmentUpdate,
     });
     await prisma.statusHistory.create({
       data: {
