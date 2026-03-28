@@ -20,7 +20,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Users, Plus, Pencil, Trash2, X, Check } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Users, Plus, X, Check, MoreHorizontal, Pencil, Trash2, Mail, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n/context";
 
@@ -29,6 +36,7 @@ interface User {
   email: string;
   name: string;
   role: string;
+  isActive: boolean;
   createdAt: string;
 }
 
@@ -82,7 +90,7 @@ export function UserManagement() {
     const res = await fetch("/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ name: form.name, email: form.email, role: form.role }),
     });
     setSaving(false);
 
@@ -137,6 +145,26 @@ export function UserManagement() {
     }
   }
 
+  async function handleResendActivation(id: string) {
+    const res = await fetch(`/api/users/${id}/send-activation`, { method: "POST" });
+    if (res.ok) {
+      toast.success(t("users.activationSent"));
+    } else {
+      const data = await res.json();
+      toast.error(data.error || t("users.activationFailed"));
+    }
+  }
+
+  async function handleSendReset(id: string) {
+    const res = await fetch(`/api/users/${id}/send-reset`, { method: "POST" });
+    if (res.ok) {
+      toast.success(t("users.resetSent"));
+    } else {
+      const data = await res.json();
+      toast.error(data.error || t("users.resetFailed"));
+    }
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
@@ -160,7 +188,7 @@ export function UserManagement() {
         )}
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Create form */}
+        {/* Create form — no password field, user sets via activation email */}
         {showCreate && (
           <div className="rounded-md border bg-gray-50 p-4 space-y-3">
             <h4 className="text-sm font-medium">{t("users.newUser")}</h4>
@@ -176,12 +204,6 @@ export function UserManagement() {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
-              <Input
-                placeholder={t("users.passwordPlaceholder")}
-                type="password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-              />
               <Select value={form.role} onValueChange={(v) => v && setForm({ ...form, role: v })}>
                 <SelectTrigger>
                   <SelectValue />
@@ -192,6 +214,7 @@ export function UserManagement() {
                 </SelectContent>
               </Select>
             </div>
+            <p className="text-xs text-gray-500">{t("users.activationEmailNote")}</p>
             <div className="flex gap-2">
               <Button size="sm" onClick={handleCreate} disabled={saving} className="gap-1">
                 <Check className="h-4 w-4" />
@@ -213,8 +236,9 @@ export function UserManagement() {
                 <TableHead>{t("table.name")}</TableHead>
                 <TableHead>{t("table.email")}</TableHead>
                 <TableHead>{t("table.role")}</TableHead>
+                <TableHead>{t("table.status")}</TableHead>
                 <TableHead>{t("table.created")}</TableHead>
-                <TableHead className="w-[100px]" />
+                <TableHead className="w-[60px]" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -255,7 +279,7 @@ export function UserManagement() {
                         className="h-8"
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell colSpan={2}>
                       <div className="flex gap-1">
                         <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleUpdate} disabled={saving}>
                           <Check className="h-4 w-4 text-green-600" />
@@ -281,44 +305,61 @@ export function UserManagement() {
                         {user.role}
                       </span>
                     </TableCell>
+                    <TableCell>
+                      <Badge variant={user.isActive ? "default" : "secondary"}>
+                        {user.isActive ? t("users.statusActive") : t("users.statusPending")}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-sm text-gray-500">
                       {new Date(user.createdAt).toLocaleDateString("nl-NL")}
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-1">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8"
-                          onClick={() => startEdit(user)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        {user.id !== currentUserId && (
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-red-500 hover:text-red-700"
-                            onClick={() => handleDelete(user.id, user.name)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md h-8 w-8 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => startEdit(user)}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            {t("users.edit")}
+                          </DropdownMenuItem>
+                          {!user.isActive && (
+                            <DropdownMenuItem onClick={() => handleResendActivation(user.id)}>
+                              <Mail className="mr-2 h-4 w-4" />
+                              {t("users.resendActivation")}
+                            </DropdownMenuItem>
+                          )}
+                          {user.isActive && (
+                            <DropdownMenuItem onClick={() => handleSendReset(user.id)}>
+                              <KeyRound className="mr-2 h-4 w-4" />
+                              {t("users.resetPasswordAction")}
+                            </DropdownMenuItem>
+                          )}
+                          {user.id !== currentUserId && (
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(user.id, user.name)}
+                              className="text-red-600 focus:text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              {t("users.delete")}
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 )
               )}
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={5} className="py-8 text-center text-gray-500">
+                  <TableCell colSpan={6} className="py-8 text-center text-gray-500">
                     {t("users.loading")}
                   </TableCell>
                 </TableRow>
               )}
               {!loading && users.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="py-8 text-center text-gray-500">
+                  <TableCell colSpan={6} className="py-8 text-center text-gray-500">
                     {t("users.noUsers")}
                   </TableCell>
                 </TableRow>

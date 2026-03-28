@@ -9,13 +9,18 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String
-  password  String
-  role      String   @default("USER")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id                 String    @id @default(uuid())
+  email              String    @unique
+  name               String
+  password           String
+  role               String    @default("USER")
+  isActive           Boolean   @default(false) @map("is_active")
+  activationToken    String?   @unique @map("activation_token")
+  activationExpires  DateTime? @map("activation_expires")
+  resetToken         String?   @unique @map("reset_token")
+  resetExpires       DateTime? @map("reset_expires")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
 
   @@map("users")
 }

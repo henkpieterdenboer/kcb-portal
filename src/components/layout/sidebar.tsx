@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Ship, Archive, Mail, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Ship, Archive, Mail, Settings, Users, LogOut } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -20,7 +20,10 @@ export function Sidebar() {
     { name: t("nav.archive"), href: "/shipments/archive", icon: Archive },
     { name: t("nav.settings"), href: "/settings", icon: Settings },
     ...(isAdmin
-      ? [{ name: t("nav.emailLog"), href: "/settings/emails", icon: Mail }]
+      ? [
+          { name: t("nav.users"), href: "/settings/users", icon: Users },
+          { name: t("nav.emailLog"), href: "/settings/emails", icon: Mail },
+        ]
       : []),
   ];
 
@@ -36,7 +39,9 @@ export function Sidebar() {
               ? pathname === "/"
               : item.href === "/shipments"
                 ? pathname === "/shipments"
-                : pathname.startsWith(item.href);
+                : item.href === "/settings"
+                  ? pathname === "/settings"
+                  : pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}

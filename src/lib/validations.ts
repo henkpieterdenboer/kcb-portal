@@ -42,7 +42,6 @@ export const loginSchema = z.object({
 export const createUserSchema = z.object({
   email: z.string().email("Invalid email address"),
   name: z.string().min(1, "Name is required"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
   role: z.enum(["ADMIN", "USER"]),
 });
 
@@ -51,4 +50,14 @@ export const updateUserSchema = z.object({
   email: z.string().email("Invalid email address").optional(),
   password: z.string().min(8, "Password must be at least 8 characters").optional(),
   role: z.enum(["ADMIN", "USER"]).optional(),
+});
+
+export const activateAccountSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });

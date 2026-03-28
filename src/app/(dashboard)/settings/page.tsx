@@ -1,21 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useSession } from "next-auth/react";
 import { useTranslation } from "@/lib/i18n/context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Copy, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import { UserManagement } from "@/components/settings/user-management";
-
 export default function SettingsPage() {
-  const { data: session } = useSession();
   const { t } = useTranslation();
   const [showKey, setShowKey] = useState(false);
   const apiKeyPlaceholder = "Configure INGEST_API_KEY in .env";
-  const isAdmin = (session?.user as { role?: string })?.role === "ADMIN";
 
   function copyEndpoint() {
     const url = `${window.location.origin}/api/ingest/email`;
@@ -26,8 +21,6 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">{t("settings.title")}</h2>
-
-      {isAdmin && <UserManagement />}
 
       <Card>
         <CardHeader>
