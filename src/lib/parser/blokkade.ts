@@ -30,7 +30,7 @@ function parseDutchDate(dateStr: string): Date | null {
 
 export function parseBlokkade(text: string): BlokkadeData | null {
   // Dossiernummer is in format BI/XXXXXXXX/XX at the top
-  const dossierMatch = text.match(/BI\/(\d+)\/(\d+)/);
+  const dossierMatch = text.match(/B[DI]\/(\d+)\/(\d+)/);
   if (!dossierMatch) return null;
   const dossiernummer = dossierMatch[0];
 
