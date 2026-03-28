@@ -218,6 +218,21 @@
     "successMessage": "Twoje haslo zostalo zaktualizowane. Mozesz sie teraz zalogowac nowym haslem.",
     "goToLogin": "Przejdz do logowania"
   },
+  "changePassword": {
+    "title": "Zmien haslo",
+    "currentPassword": "Obecne haslo",
+    "newPassword": "Nowe haslo",
+    "confirmPassword": "Potwierdz nowe haslo",
+    "currentPlaceholder": "Wprowadz obecne haslo",
+    "newPlaceholder": "Min. 8 znakow",
+    "confirmPlaceholder": "Powtorz nowe haslo",
+    "change": "Zmien haslo",
+    "changing": "Zmienianie...",
+    "passwordMin": "Haslo musi miec co najmniej 8 znakow",
+    "passwordMismatch": "Hasla nie sa zgodne",
+    "wrongPassword": "Obecne haslo jest nieprawidlowe",
+    "success": "Haslo zostalo zmienione"
+  },
   "status": {
     "AANGEMELD": "Zarejestrowany",
     "INSPECTIE_AANGEVRAAGD": "Inspekcja zamowiona",

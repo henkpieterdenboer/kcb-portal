@@ -218,6 +218,21 @@
     "successMessage": "Your password has been updated. You can now sign in with your new password.",
     "goToLogin": "Go to login"
   },
+  "changePassword": {
+    "title": "Change Password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "currentPlaceholder": "Enter current password",
+    "newPlaceholder": "Min. 8 characters",
+    "confirmPlaceholder": "Repeat new password",
+    "change": "Change Password",
+    "changing": "Changing...",
+    "passwordMin": "Password must be at least 8 characters",
+    "passwordMismatch": "Passwords do not match",
+    "wrongPassword": "Current password is incorrect",
+    "success": "Password changed successfully"
+  },
   "status": {
     "AANGEMELD": "Registered",
     "INSPECTIE_AANGEVRAAGD": "Inspection Requested",

@@ -218,6 +218,21 @@
     "successMessage": "Uw wachtwoord is bijgewerkt. U kunt nu inloggen met uw nieuwe wachtwoord.",
     "goToLogin": "Naar inlogpagina"
   },
+  "changePassword": {
+    "title": "Wachtwoord wijzigen",
+    "currentPassword": "Huidig wachtwoord",
+    "newPassword": "Nieuw wachtwoord",
+    "confirmPassword": "Bevestig nieuw wachtwoord",
+    "currentPlaceholder": "Voer huidig wachtwoord in",
+    "newPlaceholder": "Min. 8 tekens",
+    "confirmPlaceholder": "Herhaal nieuw wachtwoord",
+    "change": "Wachtwoord wijzigen",
+    "changing": "Wijzigen...",
+    "passwordMin": "Wachtwoord moet minimaal 8 tekens bevatten",
+    "passwordMismatch": "Wachtwoorden komen niet overeen",
+    "wrongPassword": "Huidig wachtwoord is onjuist",
+    "success": "Wachtwoord succesvol gewijzigd"
+  },
   "status": {
     "AANGEMELD": "Aangemeld",
     "INSPECTIE_AANGEVRAAGD": "Inspectie aangevraagd",
