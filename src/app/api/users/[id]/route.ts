@@ -35,7 +35,7 @@ export async function PUT(
 
   const data: Record<string, unknown> = {};
   if (parsed.data.name) data.name = parsed.data.name;
-  if (parsed.data.email) data.email = parsed.data.email;
+  if (parsed.data.email) data.email = parsed.data.email.toLowerCase();
   if (parsed.data.role) data.role = parsed.data.role;
   if (parsed.data.password) {
     data.password = await bcrypt.hash(parsed.data.password, 12);
