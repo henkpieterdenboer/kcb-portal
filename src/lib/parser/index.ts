@@ -377,44 +377,60 @@ export async function parseEmailBody(
   emailIngestionId: string
 ): Promise<ParseResult | null> {
   // Extract aangiftenummer from email body
-  const aanMatch = emailBody.match(/Aangiftenummer\s*:\s*(.+?)(?:\n|$)/i);
+  const aanMatch = emailBody.match(/Aangiftenummer\s*:\s*(.+?)(?:\r?\n|$)/i);
   if (!aanMatch) return null;
 
   const aangiftenummer = aanMatch[1].trim();
-  const shipment = await prisma.shipment.findUnique({
-    where: { aangiftenummer },
-    select: { id: true, awb: true, bol: true, exporteur: true, importeur: true },
-  });
 
-  if (!shipment) return null;
-
-  // Extract fields from body to fill in missing shipment data
+  // Extract fields from body
   function extractBodyField(label: string): string | null {
-    const regex = new RegExp(`${label}\\s*:\\s*(.+?)(?:\\n|$)`, "i");
+    const regex = new RegExp(`${label}\\s*:\\s*(.+?)(?:\\r?\\n|$)`, "i");
     const m = emailBody.match(regex);
     return m ? m[1].trim() || null : null;
   }
 
-  const updateData: Record<string, unknown> = {
-    emailIngestions: { connect: { id: emailIngestionId } },
-  };
-
   const awb = extractBodyField("Awb");
-  if (awb && !shipment.awb) updateData.awb = awb;
-
   const bol = extractBodyField("Bol");
-  if (bol && !shipment.bol) updateData.bol = bol;
-
   const exporteur = extractBodyField("Exporteur");
-  if (exporteur && !shipment.exporteur) updateData.exporteur = exporteur;
-
   const importeur = extractBodyField("Importeur");
-  if (importeur && !shipment.importeur) updateData.importeur = importeur;
+  const aangever = extractBodyField("Aangever");
+  const referentie = extractBodyField("Referentie");
 
-  await prisma.shipment.update({
-    where: { id: shipment.id },
-    data: updateData,
+  const emailConnect = { emailIngestions: { connect: { id: emailIngestionId } } };
+
+  // Upsert: create shipment if it doesn't exist yet (planning email before mededeling)
+  const shipment = await prisma.shipment.upsert({
+    where: { aangiftenummer },
+    create: {
+      aangiftenummer,
+      aangever: aangever || undefined,
+      referentie: referentie || undefined,
+      awb: awb || undefined,
+      bol: bol || undefined,
+      exporteur: exporteur || undefined,
+      importeur: importeur || undefined,
+      status: "AANGEMELD",
+      ...emailConnect,
+    },
+    update: {
+      ...emailConnect,
+    },
+    select: { id: true, awb: true, bol: true, exporteur: true, importeur: true },
   });
+
+  // Back-fill missing fields on existing shipments
+  const backfill: Record<string, string> = {};
+  if (awb && !shipment.awb) backfill.awb = awb;
+  if (bol && !shipment.bol) backfill.bol = bol;
+  if (exporteur && !shipment.exporteur) backfill.exporteur = exporteur;
+  if (importeur && !shipment.importeur) backfill.importeur = importeur;
+
+  if (Object.keys(backfill).length > 0) {
+    await prisma.shipment.update({
+      where: { id: shipment.id },
+      data: backfill,
+    });
+  }
 
   return { type: "EMAIL_BODY", aangiftenummer, success: true };
 }
