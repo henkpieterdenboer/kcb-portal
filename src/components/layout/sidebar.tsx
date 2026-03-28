@@ -3,19 +3,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Ship, Archive, Mail, Settings, Users, LogOut, KeyRound } from "lucide-react";
+import { LayoutDashboard, Ship, Archive, Mail, Settings, Users, LogOut, KeyRound, ChevronsUpDown } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { useTranslation, Language } from "@/lib/i18n/context";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -145,57 +145,50 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
               {adminNav.map((item) => (
                 <NavLink key={item.href} item={item} />
               ))}
-              <div className="my-2 border-t" />
             </>
           )}
 
-          {/* Language selector */}
-          <div className="px-3 py-1.5">
-            <Select value={language} onValueChange={(v) => v && setLanguage(v as Language)}>
-              <SelectTrigger className="h-8 w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
+          {/* User account dropdown */}
+          <div className={isAdmin ? "mt-2 border-t pt-3" : ""}>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-gray-50 transition-colors">
+                <Avatar className="h-8 w-8 shrink-0">
+                  <AvatarFallback className="bg-gray-200 text-sm">
+                    {(session?.user?.name || "U").charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium text-gray-900 truncate">
+                    {session?.user?.name || "User"}
+                  </div>
+                  <div className="text-xs text-gray-500 truncate">
+                    {session?.user?.email || ""}
+                  </div>
+                </div>
+                <ChevronsUpDown className="h-4 w-4 text-gray-400 shrink-0" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" side="top" className="w-56">
                 {languages.map((lang) => (
-                  <SelectItem key={lang.value} value={lang.value}>
+                  <DropdownMenuItem
+                    key={lang.value}
+                    onClick={() => setLanguage(lang.value)}
+                    className={language === lang.value ? "font-medium bg-gray-50" : ""}
+                  >
                     {lang.label}
-                  </SelectItem>
+                  </DropdownMenuItem>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* User info + actions */}
-          <div className="mt-1 border-t pt-3">
-            <div className="flex items-center gap-3 px-3 py-1.5">
-              <Avatar className="h-8 w-8 shrink-0">
-                <AvatarFallback className="bg-gray-200 text-sm">
-                  {(session?.user?.name || "U").charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium text-gray-900 truncate">
-                  {session?.user?.name || "User"}
-                </div>
-                <div className="text-xs text-gray-500 truncate">
-                  {session?.user?.email || ""}
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={() => { resetPasswordForm(); setPasswordDialogOpen(true); }}
-              className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
-            >
-              <KeyRound className="h-5 w-5" />
-              {t("changePassword.title")}
-            </button>
-            <button
-              onClick={() => { onNavigate?.(); signOut({ callbackUrl: "/login" }); }}
-              className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
-            >
-              <LogOut className="h-5 w-5" />
-              {t("nav.signOut")}
-            </button>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => { resetPasswordForm(); setPasswordDialogOpen(true); }}>
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  {t("changePassword.title")}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => { onNavigate?.(); signOut({ callbackUrl: "/login" }); }}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  {t("nav.signOut")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
