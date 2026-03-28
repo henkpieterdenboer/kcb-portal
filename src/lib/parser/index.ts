@@ -144,13 +144,29 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
   const data = parseInspectie(text);
   if (!data) return { type: "INSPECTIE", success: false, error: "Failed to parse inspection report" };
 
-  // Find linked shipment by aanvraagnummer (= aangiftenummer)
+  // Find or create linked shipment by aanvraagnummer (= aangiftenummer)
   let shipmentId: string | null = null;
   if (data.aanvraagnummer) {
-    const shipment = await prisma.shipment.findUnique({
+    const emailConnect = emailIngestionId
+      ? { emailIngestions: { connect: { id: emailIngestionId } } }
+      : {};
+
+    const shipment = await prisma.shipment.upsert({
       where: { aangiftenummer: data.aanvraagnummer },
+      create: {
+        aangiftenummer: data.aanvraagnummer,
+        aangever: data.aangever,
+        referentie: data.referentie,
+        awb: data.awbNummer,
+        landVanOorsprong: data.landVanVertrek,
+        inspectiedatum: data.inspectiedatum,
+        inspectielocatie: data.locatieNaam,
+        status: "DOCUMENTCONTROLE",
+        ...emailConnect,
+      },
+      update: {},
     });
-    shipmentId = shipment?.id || null;
+    shipmentId = shipment.id;
   }
 
   // Determine overall status from resultaten
@@ -201,7 +217,7 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
     },
   });
 
-  // Update shipment status, fill in AWB/BOL if missing, and link email
+  // Update shipment status and fill in AWB/BOL if missing
   if (shipmentId) {
     const newStatus = normalizeStatus(overallStatus);
     const shipmentUpdateData: Record<string, unknown> = { status: newStatus };
@@ -209,9 +225,6 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
       const current = await prisma.shipment.findUnique({ where: { id: shipmentId }, select: { awb: true, bol: true } });
       if (!current?.awb) shipmentUpdateData.awb = data.awbNummer;
       if (!current?.bol && data.bolNummer) shipmentUpdateData.bol = data.bolNummer;
-    }
-    if (emailIngestionId) {
-      shipmentUpdateData.emailIngestions = { connect: { id: emailIngestionId } };
     }
     await prisma.shipment.update({
       where: { id: shipmentId },
@@ -234,21 +247,24 @@ async function processMonster(text: string, emailIngestionId?: string): Promise<
   const data = parseMonster(text);
   if (!data) return { type: "MONSTER", success: false, error: "Failed to parse sample report" };
 
-  // Find linked shipment
+  // Find or create linked shipment
   let shipmentId: string | null = null;
   if (data.aanvraagnummer) {
-    const shipment = await prisma.shipment.findUnique({
-      where: { aangiftenummer: data.aanvraagnummer },
-    });
-    shipmentId = shipment?.id || null;
+    const emailConnect = emailIngestionId
+      ? { emailIngestions: { connect: { id: emailIngestionId } } }
+      : {};
 
-    // Link email to shipment
-    if (shipmentId && emailIngestionId) {
-      await prisma.shipment.update({
-        where: { id: shipmentId },
-        data: { emailIngestions: { connect: { id: emailIngestionId } } },
-      });
-    }
+    const shipment = await prisma.shipment.upsert({
+      where: { aangiftenummer: data.aanvraagnummer },
+      create: {
+        aangiftenummer: data.aanvraagnummer,
+        landVanOorsprong: data.landVanOorsprong,
+        status: "DOCUMENTCONTROLE",
+        ...emailConnect,
+      },
+      update: emailConnect,
+    });
+    shipmentId = shipment.id;
   }
 
   await prisma.sampleReport.upsert({
@@ -288,32 +304,39 @@ async function processBlokkade(text: string, emailIngestionId?: string): Promise
   const data = parseBlokkade(text);
   if (!data) return { type: "BLOKKADE", success: false, error: "Failed to parse blockade report" };
 
-  // Find linked shipment
+  // Find or create linked shipment
   let shipmentId: string | null = null;
   if (data.aangiftenummer) {
-    const shipment = await prisma.shipment.findUnique({
-      where: { aangiftenummer: data.aangiftenummer },
-    });
-    shipmentId = shipment?.id || null;
+    const emailConnect = emailIngestionId
+      ? { emailIngestions: { connect: { id: emailIngestionId } } }
+      : {};
 
-    // Update shipment status to GEBLOKKEERD and link email
-    if (shipmentId) {
-      const emailConnect = emailIngestionId
-        ? { emailIngestions: { connect: { id: emailIngestionId } } }
-        : {};
-      await prisma.shipment.update({
-        where: { id: shipmentId },
-        data: { status: "GEBLOKKEERD", ...emailConnect },
-      });
-      await prisma.statusHistory.create({
-        data: {
-          shipmentId,
-          status: "GEBLOKKEERD",
-          source: "BLOKKADERAPPORT",
-          details: `Blockade: ${data.reden || "Unknown reason"}`,
-        },
-      });
-    }
+    const shipment = await prisma.shipment.upsert({
+      where: { aangiftenummer: data.aangiftenummer },
+      create: {
+        aangiftenummer: data.aangiftenummer,
+        referentie: data.referentie,
+        inspectiedatum: data.inspectiedatum,
+        inspectielocatie: data.locatieNaam,
+        landVanOorsprong: data.landVanAfgifte,
+        status: "GEBLOKKEERD",
+        ...emailConnect,
+      },
+      update: {
+        status: "GEBLOKKEERD",
+        ...emailConnect,
+      },
+    });
+    shipmentId = shipment.id;
+
+    await prisma.statusHistory.create({
+      data: {
+        shipmentId,
+        status: "GEBLOKKEERD",
+        source: "BLOKKADERAPPORT",
+        details: `Blockade: ${data.reden || "Unknown reason"}`,
+      },
+    });
   }
 
   await prisma.blockadeReport.upsert({
