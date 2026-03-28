@@ -49,11 +49,11 @@ export async function parsePdfBuffer(buffer: Buffer, emailIngestionId?: string):
     case "MEDEDELING":
       return processMededeling(text, emailIngestionId);
     case "INSPECTIE":
-      return processInspectie(text);
+      return processInspectie(text, emailIngestionId);
     case "MONSTER":
-      return processMonster(text);
+      return processMonster(text, emailIngestionId);
     case "BLOKKADE":
-      return processBlokkade(text);
+      return processBlokkade(text, emailIngestionId);
     default:
       return { type: "UNKNOWN", success: false, error: "Unknown document type" };
   }
@@ -62,6 +62,10 @@ export async function parsePdfBuffer(buffer: Buffer, emailIngestionId?: string):
 async function processMededeling(text: string, emailIngestionId?: string): Promise<ParseResult> {
   const data = parseMededeling(text);
   if (!data) return { type: "MEDEDELING", success: false, error: "Failed to parse mededeling" };
+
+  const emailConnect = emailIngestionId
+    ? { emailIngestions: { connect: { id: emailIngestionId } } }
+    : {};
 
   const shipment = await prisma.shipment.upsert({
     where: { aangiftenummer: data.aangiftenummer },
@@ -84,7 +88,7 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
       inspectielocatie: data.inspectielocatie,
       verwachteAankomst: data.verwachteAankomst,
       status: data.status,
-      emailIngestionId,
+      ...emailConnect,
     },
     update: {
       aangever: data.aangever,
@@ -102,7 +106,7 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
       inspectielocatie: data.inspectielocatie,
       verwachteAankomst: data.verwachteAankomst,
       status: data.status,
-      emailIngestionId,
+      ...emailConnect,
     },
   });
 
@@ -136,7 +140,7 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
   return { type: "MEDEDELING", aangiftenummer: data.aangiftenummer, success: true };
 }
 
-async function processInspectie(text: string): Promise<ParseResult> {
+async function processInspectie(text: string, emailIngestionId?: string): Promise<ParseResult> {
   const data = parseInspectie(text);
   if (!data) return { type: "INSPECTIE", success: false, error: "Failed to parse inspection report" };
 
@@ -197,18 +201,21 @@ async function processInspectie(text: string): Promise<ParseResult> {
     },
   });
 
-  // Update shipment status and fill in AWB/BOL if missing
+  // Update shipment status, fill in AWB/BOL if missing, and link email
   if (shipmentId) {
     const newStatus = normalizeStatus(overallStatus);
-    const shipmentUpdate: Record<string, string> = { status: newStatus };
+    const shipmentUpdateData: Record<string, unknown> = { status: newStatus };
     if (data.awbNummer) {
       const current = await prisma.shipment.findUnique({ where: { id: shipmentId }, select: { awb: true, bol: true } });
-      if (!current?.awb) shipmentUpdate.awb = data.awbNummer;
-      if (!current?.bol && data.bolNummer) shipmentUpdate.bol = data.bolNummer;
+      if (!current?.awb) shipmentUpdateData.awb = data.awbNummer;
+      if (!current?.bol && data.bolNummer) shipmentUpdateData.bol = data.bolNummer;
+    }
+    if (emailIngestionId) {
+      shipmentUpdateData.emailIngestions = { connect: { id: emailIngestionId } };
     }
     await prisma.shipment.update({
       where: { id: shipmentId },
-      data: shipmentUpdate,
+      data: shipmentUpdateData,
     });
     await prisma.statusHistory.create({
       data: {
@@ -223,7 +230,7 @@ async function processInspectie(text: string): Promise<ParseResult> {
   return { type: "INSPECTIE", aangiftenummer: data.aanvraagnummer || undefined, success: true };
 }
 
-async function processMonster(text: string): Promise<ParseResult> {
+async function processMonster(text: string, emailIngestionId?: string): Promise<ParseResult> {
   const data = parseMonster(text);
   if (!data) return { type: "MONSTER", success: false, error: "Failed to parse sample report" };
 
@@ -234,6 +241,14 @@ async function processMonster(text: string): Promise<ParseResult> {
       where: { aangiftenummer: data.aanvraagnummer },
     });
     shipmentId = shipment?.id || null;
+
+    // Link email to shipment
+    if (shipmentId && emailIngestionId) {
+      await prisma.shipment.update({
+        where: { id: shipmentId },
+        data: { emailIngestions: { connect: { id: emailIngestionId } } },
+      });
+    }
   }
 
   await prisma.sampleReport.upsert({
@@ -269,7 +284,7 @@ async function processMonster(text: string): Promise<ParseResult> {
   return { type: "MONSTER", aangiftenummer: data.aanvraagnummer || undefined, success: true };
 }
 
-async function processBlokkade(text: string): Promise<ParseResult> {
+async function processBlokkade(text: string, emailIngestionId?: string): Promise<ParseResult> {
   const data = parseBlokkade(text);
   if (!data) return { type: "BLOKKADE", success: false, error: "Failed to parse blockade report" };
 
@@ -281,11 +296,14 @@ async function processBlokkade(text: string): Promise<ParseResult> {
     });
     shipmentId = shipment?.id || null;
 
-    // Update shipment status to GEBLOKKEERD
+    // Update shipment status to GEBLOKKEERD and link email
     if (shipmentId) {
+      const emailConnect = emailIngestionId
+        ? { emailIngestions: { connect: { id: emailIngestionId } } }
+        : {};
       await prisma.shipment.update({
         where: { id: shipmentId },
-        data: { status: "GEBLOKKEERD" },
+        data: { status: "GEBLOKKEERD", ...emailConnect },
       });
       await prisma.statusHistory.create({
         data: {

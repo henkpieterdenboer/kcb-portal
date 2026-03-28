@@ -100,7 +100,8 @@
     "attachments": "Attachments:",
     "file": "file",
     "files": "files",
-    "noBody": "No email body available"
+    "noBody": "No email body available",
+    "linkedEmails": "Linked Emails"
   },
   "emailLog": {
     "title": "Email Ingestion Log",

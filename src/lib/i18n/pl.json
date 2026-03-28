@@ -100,7 +100,8 @@
     "attachments": "Zalaczniki:",
     "file": "plik",
     "files": "pliki",
-    "noBody": "Brak tresci e-maila"
+    "noBody": "Brak tresci e-maila",
+    "linkedEmails": "Powiazane e-maile"
   },
   "emailLog": {
     "title": "Dziennik przyjmowania e-maili",

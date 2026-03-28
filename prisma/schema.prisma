@@ -53,8 +53,7 @@ model Shipment {
   sampleReports     SampleReport[]
   blockadeReports   BlockadeReport[]
   statusHistory     StatusHistory[]
-  emailIngestionId  String?          @map("email_ingestion_id")
-  emailIngestion    EmailIngestion?  @relation(fields: [emailIngestionId], references: [id])
+  emailIngestions   EmailIngestion[]
 
   @@map("shipments")
 }

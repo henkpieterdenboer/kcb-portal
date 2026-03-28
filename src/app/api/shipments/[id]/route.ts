@@ -22,7 +22,16 @@ export async function GET(
       sampleReports: { orderBy: { createdAt: "desc" } },
       blockadeReports: { orderBy: { createdAt: "desc" } },
       statusHistory: { orderBy: { timestamp: "asc" } },
-      emailIngestion: true,
+      emailIngestions: {
+        select: {
+          id: true,
+          subject: true,
+          fromAddress: true,
+          receivedAt: true,
+          attachmentCount: true,
+        },
+        orderBy: { processedAt: "asc" },
+      },
     },
   });
 

@@ -83,15 +83,13 @@ interface ShipmentDetail {
     details: string | null;
     timestamp: string;
   }>;
-  emailIngestion: {
+  emailIngestions: Array<{
     id: string;
     subject: string | null;
     fromAddress: string | null;
     receivedAt: string | null;
-    emailBody: string | null;
-    emailBodyHtml: string | null;
     attachmentCount: number;
-  } | null;
+  }>;
 }
 
 interface EmailSheetDetail {
@@ -370,43 +368,46 @@ export default function ShipmentDetailPage() {
         <CardContent>
           <StatusTimeline
             history={shipment.statusHistory}
-            onViewEmail={shipment.emailIngestion ? () => openEmailDetail(shipment.emailIngestion!.id) : undefined}
+            onViewEmail={shipment.emailIngestions.length > 0 ? () => openEmailDetail(shipment.emailIngestions[0].id) : undefined}
           />
         </CardContent>
       </Card>
 
-      {/* Original Email */}
-      {shipment.emailIngestion && (
+      {/* Linked Emails */}
+      {shipment.emailIngestions.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Mail className="h-4 w-4 text-gray-600" />
-              {t("email.originalEmail")}
+              {t("email.linkedEmails")} ({shipment.emailIngestions.length})
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <button
-              onClick={() => openEmailDetail(shipment.emailIngestion!.id)}
-              className="w-full rounded-md border bg-white p-3 text-left hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="font-medium text-sm truncate">{shipment.emailIngestion.subject || "-"}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">
-                    {shipment.emailIngestion.fromAddress || "-"}
-                    {shipment.emailIngestion.receivedAt && (
-                      <> &middot; {new Date(shipment.emailIngestion.receivedAt).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}</>
-                    )}
+          <CardContent className="space-y-2">
+            {shipment.emailIngestions.map((email) => (
+              <button
+                key={email.id}
+                onClick={() => openEmailDetail(email.id)}
+                className="w-full rounded-md border bg-white p-3 text-left hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium text-sm truncate">{email.subject || "-"}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">
+                      {email.fromAddress || "-"}
+                      {email.receivedAt && (
+                        <> &middot; {new Date(email.receivedAt).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}</>
+                      )}
+                    </div>
                   </div>
+                  {email.attachmentCount > 0 && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 shrink-0">
+                      <Paperclip className="h-3 w-3" />
+                      {email.attachmentCount}
+                    </span>
+                  )}
                 </div>
-                {shipment.emailIngestion.attachmentCount > 0 && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 shrink-0">
-                    <Paperclip className="h-3 w-3" />
-                    {shipment.emailIngestion.attachmentCount}
-                  </span>
-                )}
-              </div>
-            </button>
+              </button>
+            ))}
           </CardContent>
         </Card>
       )}

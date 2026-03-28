@@ -100,7 +100,8 @@
     "attachments": "Bijlagen:",
     "file": "bestand",
     "files": "bestanden",
-    "noBody": "Geen e-mailinhoud beschikbaar"
+    "noBody": "Geen e-mailinhoud beschikbaar",
+    "linkedEmails": "Gekoppelde e-mails"
   },
   "emailLog": {
     "title": "E-mail ingestie log",
