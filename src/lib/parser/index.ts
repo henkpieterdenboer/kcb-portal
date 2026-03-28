@@ -85,6 +85,12 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
     ? { emailIngestions: { connect: { id: emailIngestionId } } }
     : {};
 
+  // Check current status before upserting
+  const existing = await prisma.shipment.findUnique({
+    where: { aangiftenummer: data.aangiftenummer },
+    select: { status: true },
+  });
+
   const shipment = await shipmentUpsert({
     where: { aangiftenummer: data.aangiftenummer },
     create: {
@@ -128,15 +134,17 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
     },
   });
 
-  // Create status history entry
-  await prisma.statusHistory.create({
-    data: {
-      shipmentId: shipment.id,
-      status: data.status,
-      source: "MEDEDELING",
-      details: `Status update from Mededeling PDF`,
-    },
-  });
+  // Only create status history entry if status actually changed
+  if (!existing || existing.status !== data.status) {
+    await prisma.statusHistory.create({
+      data: {
+        shipmentId: shipment.id,
+        status: data.status,
+        source: "MEDEDELING",
+        details: `Status update from Mededeling PDF`,
+      },
+    });
+  }
 
   // Upsert sub-shipments (delete old, create new)
   if (data.subShipments.length > 0) {
@@ -241,24 +249,27 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
   // Update shipment status and fill in AWB/BOL if missing
   if (shipmentId) {
     const newStatus = normalizeStatus(overallStatus);
+    const current = await prisma.shipment.findUnique({ where: { id: shipmentId }, select: { awb: true, bol: true, status: true } });
     const shipmentUpdateData: Record<string, unknown> = { status: newStatus };
-    if (data.awbNummer) {
-      const current = await prisma.shipment.findUnique({ where: { id: shipmentId }, select: { awb: true, bol: true } });
-      if (!current?.awb) shipmentUpdateData.awb = data.awbNummer;
-      if (!current?.bol && data.bolNummer) shipmentUpdateData.bol = data.bolNummer;
-    }
+    if (data.awbNummer && !current?.awb) shipmentUpdateData.awb = data.awbNummer;
+    if (data.bolNummer && !current?.bol) shipmentUpdateData.bol = data.bolNummer;
+
     await prisma.shipment.update({
       where: { id: shipmentId },
       data: shipmentUpdateData,
     });
-    await prisma.statusHistory.create({
-      data: {
-        shipmentId,
-        status: newStatus,
-        source: "INSPECTIERAPPORT",
-        details: `Inspection report ${data.rapportnummer}: ${overallStatus}`,
-      },
-    });
+
+    // Only create status history entry if status actually changed
+    if (!current || current.status !== newStatus) {
+      await prisma.statusHistory.create({
+        data: {
+          shipmentId,
+          status: newStatus,
+          source: "INSPECTIERAPPORT",
+          details: `Inspection report ${data.rapportnummer}: ${overallStatus}`,
+        },
+      });
+    }
   }
 
   return { type: "INSPECTIE", aangiftenummer: data.aanvraagnummer || undefined, success: true };
@@ -332,6 +343,12 @@ async function processBlokkade(text: string, emailIngestionId?: string): Promise
       ? { emailIngestions: { connect: { id: emailIngestionId } } }
       : {};
 
+    // Check current status before upserting
+    const existingBlockade = await prisma.shipment.findUnique({
+      where: { aangiftenummer: data.aangiftenummer },
+      select: { status: true },
+    });
+
     const shipment = await shipmentUpsert({
       where: { aangiftenummer: data.aangiftenummer },
       create: {
@@ -350,14 +367,17 @@ async function processBlokkade(text: string, emailIngestionId?: string): Promise
     });
     shipmentId = shipment.id;
 
-    await prisma.statusHistory.create({
-      data: {
-        shipmentId: shipment.id,
-        status: "GEBLOKKEERD",
-        source: "BLOKKADERAPPORT",
-        details: `Blockade: ${data.reden || "Unknown reason"}`,
-      },
-    });
+    // Only create status history entry if status actually changed
+    if (!existingBlockade || existingBlockade.status !== "GEBLOKKEERD") {
+      await prisma.statusHistory.create({
+        data: {
+          shipmentId: shipment.id,
+          status: "GEBLOKKEERD",
+          source: "BLOKKADERAPPORT",
+          details: `Blockade: ${data.reden || "Unknown reason"}`,
+        },
+      });
+    }
   }
 
   await prisma.blockadeReport.upsert({
