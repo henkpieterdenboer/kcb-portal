@@ -141,6 +141,9 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
 }
 
 async function processInspectie(text: string, emailIngestionId?: string): Promise<ParseResult> {
+  // Temporary debug: log first 1000 chars to find AWB label format
+  console.log("[DEBUG INSPECTIE TEXT]", text.substring(0, 1000));
+
   const data = parseInspectie(text);
   if (!data) return { type: "INSPECTIE", success: false, error: "Failed to parse inspection report" };
 

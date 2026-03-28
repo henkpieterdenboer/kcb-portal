@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { processEmailAttachments } from "@/lib/ingest/process-attachments";
+import { parseEmailBody } from "@/lib/parser";
 
 export async function POST(
   request: NextRequest,
@@ -45,6 +46,16 @@ export async function POST(
   });
 
   const { results, errors } = await processEmailAttachments(id, attachments);
+
+  // Also parse email body for structured fields (same as initial ingestion)
+  if (ingestion.emailBody) {
+    try {
+      const bodyResult = await parseEmailBody(ingestion.emailBody, id);
+      if (bodyResult) results.push(bodyResult);
+    } catch (err) {
+      console.error("Failed to parse email body on reprocess:", err);
+    }
+  }
 
   const shipments = results
     .filter((r) => r.success && r.aangiftenummer)
