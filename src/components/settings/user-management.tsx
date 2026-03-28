@@ -27,7 +27,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Users, Plus, X, Check, MoreHorizontal, Pencil, Trash2, Mail, KeyRound } from "lucide-react";
+import { Users, Plus, X, Check, MoreHorizontal, Pencil, Trash2, Mail, KeyRound, UserX, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n/context";
 
@@ -162,6 +162,21 @@ export function UserManagement() {
     } else {
       const data = await res.json();
       toast.error(data.error || t("users.resetFailed"));
+    }
+  }
+
+  async function handleToggleActive(id: string, currentlyActive: boolean) {
+    const res = await fetch(`/api/users/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isActive: !currentlyActive }),
+    });
+    if (res.ok) {
+      toast.success(currentlyActive ? t("users.deactivated") : t("users.activated"));
+      fetchUsers();
+    } else {
+      const data = await res.json();
+      toast.error(data.error || t("users.updateFailed"));
     }
   }
 
@@ -333,6 +348,21 @@ export function UserManagement() {
                             <DropdownMenuItem onClick={() => handleSendReset(user.id)}>
                               <KeyRound className="mr-2 h-4 w-4" />
                               {t("users.resetPasswordAction")}
+                            </DropdownMenuItem>
+                          )}
+                          {user.id !== currentUserId && (
+                            <DropdownMenuItem onClick={() => handleToggleActive(user.id, user.isActive)}>
+                              {user.isActive ? (
+                                <>
+                                  <UserX className="mr-2 h-4 w-4" />
+                                  {t("users.deactivate")}
+                                </>
+                              ) : (
+                                <>
+                                  <UserCheck className="mr-2 h-4 w-4" />
+                                  {t("users.activate")}
+                                </>
+                              )}
                             </DropdownMenuItem>
                           )}
                           {user.id !== currentUserId && (

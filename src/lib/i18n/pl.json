@@ -175,7 +175,11 @@
     "activationSent": "E-mail aktywacyjny wyslany",
     "activationFailed": "Nie udalo sie wyslac e-maila aktywacyjnego",
     "resetSent": "E-mail resetowania hasla wyslany",
-    "resetFailed": "Nie udalo sie wyslac e-maila resetowania hasla"
+    "resetFailed": "Nie udalo sie wyslac e-maila resetowania hasla",
+    "deactivate": "Dezaktywuj",
+    "activate": "Aktywuj",
+    "deactivated": "Uzytkownik dezaktywowany",
+    "activated": "Uzytkownik aktywowany"
   },
   "testBanner": {
     "title": "Srodowisko testowe",

@@ -4,6 +4,6 @@ export function generateToken(): string {
   return crypto.randomBytes(32).toString("hex");
 }
 
-export function tokenExpiry(hours = 24): Date {
+export function tokenExpiry(hours = 168): Date {
   return new Date(Date.now() + hours * 3600000);
 }

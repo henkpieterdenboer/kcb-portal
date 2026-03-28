@@ -40,6 +40,9 @@ export async function PUT(
   if (parsed.data.password) {
     data.password = await bcrypt.hash(parsed.data.password, 12);
   }
+  if (parsed.data.isActive !== undefined) {
+    data.isActive = parsed.data.isActive;
+  }
 
   try {
     const user = await prisma.user.update({

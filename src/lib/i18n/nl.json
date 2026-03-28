@@ -175,7 +175,11 @@
     "activationSent": "Activatie-e-mail verzonden",
     "activationFailed": "Activatie-e-mail verzenden mislukt",
     "resetSent": "Wachtwoord-reset e-mail verzonden",
-    "resetFailed": "Wachtwoord-reset e-mail verzenden mislukt"
+    "resetFailed": "Wachtwoord-reset e-mail verzenden mislukt",
+    "deactivate": "Deactiveren",
+    "activate": "Activeren",
+    "deactivated": "Gebruiker gedeactiveerd",
+    "activated": "Gebruiker geactiveerd"
   },
   "testBanner": {
     "title": "Testomgeving",

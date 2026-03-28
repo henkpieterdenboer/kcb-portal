@@ -58,7 +58,7 @@ export function activationEmailTemplate(name: string, url: string): string {
       ${emailButton(url, "Set your password")}
     </p>
     <p style="margin:0;font-size:12px;color:#6b7280;">
-      This link expires in 24 hours. If you did not expect this email, you can safely ignore it.
+      This link expires in 7 days. If you did not expect this email, you can safely ignore it.
     </p>
   `);
 }
@@ -73,7 +73,7 @@ export function resetPasswordEmailTemplate(name: string, url: string): string {
       ${emailButton(url, "Reset password")}
     </p>
     <p style="margin:0;font-size:12px;color:#6b7280;">
-      This link expires in 24 hours. If you did not request this, you can safely ignore it.
+      This link expires in 7 days. If you did not request this, you can safely ignore it.
     </p>
   `);
 }

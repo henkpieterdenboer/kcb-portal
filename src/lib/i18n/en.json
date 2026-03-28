@@ -175,7 +175,11 @@
     "activationSent": "Activation email sent",
     "activationFailed": "Failed to send activation email",
     "resetSent": "Password reset email sent",
-    "resetFailed": "Failed to send reset email"
+    "resetFailed": "Failed to send reset email",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "deactivated": "User deactivated",
+    "activated": "User activated"
   },
   "testBanner": {
     "title": "Test Environment",

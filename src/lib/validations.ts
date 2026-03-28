@@ -50,6 +50,7 @@ export const updateUserSchema = z.object({
   email: z.string().email("Invalid email address").optional(),
   password: z.string().min(8, "Password must be at least 8 characters").optional(),
   role: z.enum(["ADMIN", "USER"]).optional(),
+  isActive: z.boolean().optional(),
 });
 
 export const activateAccountSchema = z.object({
