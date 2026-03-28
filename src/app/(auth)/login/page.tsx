@@ -38,66 +38,87 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">{t("auth.title")}</CardTitle>
-          <p className="text-sm text-gray-500">
+    <div className="flex min-h-screen">
+      {/* Left: hero image */}
+      <div className="relative hidden w-1/2 lg:block">
+        <img
+          src="/inspection-hero.webp"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute bottom-8 left-8 right-8">
+          <h2 className="text-2xl font-bold text-white drop-shadow-lg">
+            {t("auth.title")}
+          </h2>
+          <p className="mt-1 text-sm text-white/80 drop-shadow">
             {t("auth.subtitle")}
           </p>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
-                {error}
+        </div>
+      </div>
+
+      {/* Right: login form */}
+      <div className="flex w-full items-center justify-center bg-gray-50 lg:w-1/2">
+        <Card className="w-full max-w-md mx-6">
+          <CardHeader className="space-y-1 text-center lg:text-left">
+            <CardTitle className="text-2xl font-bold">{t("auth.title")}</CardTitle>
+            <p className="text-sm text-gray-500 lg:hidden">
+              {t("auth.subtitle")}
+            </p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+                  {error}
+                </div>
+              )}
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium">
+                  {t("auth.email")}
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t("auth.emailPlaceholder")}
+                  required
+                />
               </div>
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-medium">
+                  {t("auth.password")}
+                </label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? t("auth.signingIn") : t("auth.signIn")}
+              </Button>
+            </form>
+            {process.env.NEXT_PUBLIC_TEST_MODE === "true" && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("admin@coloriginz.nl");
+                  setPassword("KcbInspect!2026");
+                }}
+                className="mt-4 w-full rounded-md border border-dashed border-red-300 bg-red-50 p-3 text-left text-sm text-red-600 transition-colors hover:bg-red-100"
+              >
+                <span className="font-medium">{t("auth.testCredentials")}</span>
+                <br />
+                admin@coloriginz.nl / KcbInspect!2026
+              </button>
             )}
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
-                {t("auth.email")}
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t("auth.emailPlaceholder")}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">
-                {t("auth.password")}
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? t("auth.signingIn") : t("auth.signIn")}
-            </Button>
-          </form>
-          {process.env.NEXT_PUBLIC_TEST_MODE === "true" && (
-            <button
-              type="button"
-              onClick={() => {
-                setEmail("admin@coloriginz.nl");
-                setPassword("KcbInspect!2026");
-              }}
-              className="mt-4 w-full rounded-md border border-dashed border-red-300 bg-red-50 p-3 text-left text-sm text-red-600 transition-colors hover:bg-red-100"
-            >
-              <span className="font-medium">{t("auth.testCredentials")}</span>
-              <br />
-              admin@coloriginz.nl / KcbInspect!2026
-            </button>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
