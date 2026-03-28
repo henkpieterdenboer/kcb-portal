@@ -121,7 +121,11 @@
     "errorDetails": "Foutdetails",
     "linkedShipments": "{count} zending(en)",
     "viewEmail": "E-mail bekijken",
-    "downloadAttachment": "Downloaden"
+    "downloadAttachment": "Downloaden",
+    "reprocess": "Opnieuw verwerken",
+    "reprocessing": "Verwerken...",
+    "reprocessSuccess": "E-mail opnieuw verwerkt",
+    "reprocessError": "Verwerking mislukt"
   },
   "settings": {
     "title": "Instellingen",

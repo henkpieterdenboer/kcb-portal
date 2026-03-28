@@ -121,7 +121,11 @@
     "errorDetails": "Szczegoly bledu",
     "linkedShipments": "{count} przesylka(i)",
     "viewEmail": "Zobacz e-mail",
-    "downloadAttachment": "Pobierz"
+    "downloadAttachment": "Pobierz",
+    "reprocess": "Przetwórz ponownie",
+    "reprocessing": "Przetwarzanie...",
+    "reprocessSuccess": "E-mail przetworzony ponownie",
+    "reprocessError": "Przetwarzanie nie powiodlo sie"
   },
   "settings": {
     "title": "Ustawienia",

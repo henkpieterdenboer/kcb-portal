@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { emailIngestionSchema } from "@/lib/validations";
 import { prisma } from "@/lib/db";
-import { parsePdfBuffer, ParseResult } from "@/lib/parser";
+import { processEmailAttachments } from "@/lib/ingest/process-attachments";
 
 export async function POST(request: NextRequest) {
   // Verify API key
@@ -22,11 +22,9 @@ export async function POST(request: NextRequest) {
 
   const { subject, from, receivedDateTime, body: emailBody, bodyHtml: emailBodyHtml, attachments } = parsed.data;
 
-  // Create email ingestion record
   const pdfAttachments = attachments.filter(
     (a) => a.name.toLowerCase().endsWith(".pdf")
   );
-  const parsableAttachments = pdfAttachments.filter((a) => a.contentBytes);
 
   const emailIngestion = await prisma.emailIngestion.create({
     data: {
@@ -41,37 +39,10 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  const results: ParseResult[] = [];
-  const errors: string[] = [];
-
-  // Note: attachments without contentBytes are skipped (shared mailbox triggers may not include content)
-  if (pdfAttachments.length > 0 && parsableAttachments.length === 0) {
-    errors.push("PDF attachments found but none have contentBytes - use 'Get Attachment' action in Power Automate to include file content");
-  }
-
-  for (const attachment of parsableAttachments) {
-    try {
-      const buffer = Buffer.from(attachment.contentBytes!, "base64");
-      const result = await parsePdfBuffer(buffer, emailIngestion.id);
-      results.push(result);
-      if (!result.success && result.error) {
-        errors.push(`${attachment.name}: ${result.error}`);
-      }
-    } catch (err) {
-      const errorMsg = `${attachment.name}: ${err instanceof Error ? err.message : "Unknown error"}`;
-      errors.push(errorMsg);
-      results.push({ type: "ERROR", success: false, error: errorMsg });
-    }
-  }
-
-  // Update email ingestion status
-  await prisma.emailIngestion.update({
-    where: { id: emailIngestion.id },
-    data: {
-      status: errors.length > 0 ? "PARTIAL_ERROR" : "PROCESSED",
-      errors: errors.length > 0 ? errors.join("; ") : null,
-    },
-  });
+  const { results, errors } = await processEmailAttachments(
+    emailIngestion.id,
+    attachments
+  );
 
   const shipments = results
     .filter((r) => r.success && r.aangiftenummer)

@@ -27,7 +27,8 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { Mail, Search, ChevronDown, ChevronUp, FileDown, Paperclip } from "lucide-react";
+import { Mail, Search, ChevronDown, ChevronUp, FileDown, Paperclip, RotateCw } from "lucide-react";
+import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n/context";
 
 interface LinkedShipment {
@@ -81,6 +82,7 @@ export function EmailIngestionLog() {
   const [selectedEmail, setSelectedEmail] = useState<EmailDetail | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [reprocessing, setReprocessing] = useState(false);
 
   const fetchIngestions = useCallback(async () => {
     setLoading(true);
@@ -116,6 +118,24 @@ export function EmailIngestionLog() {
       setSelectedEmail(data);
     }
     setLoadingDetail(false);
+  }
+
+  async function handleReprocess(id: string) {
+    setReprocessing(true);
+    try {
+      const res = await fetch(`/api/email-ingestions/${id}/reprocess`, { method: "POST" });
+      if (res.ok) {
+        toast.success(t("emailLog.reprocessSuccess"));
+        openEmailDetail(id);
+        fetchIngestions();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || t("emailLog.reprocessError"));
+      }
+    } catch {
+      toast.error(t("emailLog.reprocessError"));
+    }
+    setReprocessing(false);
   }
 
   function statusBadge(status: string) {
@@ -346,6 +366,18 @@ export function EmailIngestionLog() {
             <SheetDescription>
               {selectedEmail?.subject || ""}
             </SheetDescription>
+            {selectedEmail && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleReprocess(selectedEmail.id)}
+                disabled={reprocessing}
+                className="mt-2 w-fit"
+              >
+                <RotateCw className={`h-3.5 w-3.5 mr-1.5 ${reprocessing ? "animate-spin" : ""}`} />
+                {reprocessing ? t("emailLog.reprocessing") : t("emailLog.reprocess")}
+              </Button>
+            )}
           </SheetHeader>
 
           {loadingDetail ? (

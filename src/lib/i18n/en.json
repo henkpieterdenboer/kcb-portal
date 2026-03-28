@@ -121,7 +121,11 @@
     "errorDetails": "Error details",
     "linkedShipments": "{count} shipment(s)",
     "viewEmail": "View email",
-    "downloadAttachment": "Download"
+    "downloadAttachment": "Download",
+    "reprocess": "Reprocess",
+    "reprocessing": "Reprocessing...",
+    "reprocessSuccess": "Email reprocessed successfully",
+    "reprocessError": "Failed to reprocess email"
   },
   "settings": {
     "title": "Settings",
