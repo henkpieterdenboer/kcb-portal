@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
   const activationUrl = `${appUrl}/activate/${activationToken}`;
 
   try {
-    await sendEmail(email, "Set your password — KCB Dashboard", activationEmailTemplate(name, activationUrl));
+    await sendEmail(email, "Set your password — KCB Portal", activationEmailTemplate(name, activationUrl));
   } catch (err) {
     console.error("Failed to send activation email:", err);
   }

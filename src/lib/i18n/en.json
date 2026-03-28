@@ -7,11 +7,11 @@
     "emailLog": "Email Log",
     "users": "Users",
     "signOut": "Sign Out",
-    "appTitle": "KCB Dashboard"
+    "appTitle": "KCB Portal"
   },
   "auth": {
-    "title": "KCB Dashboard",
-    "subtitle": "Sign in to access the inspection dashboard",
+    "title": "KCB Portal",
+    "subtitle": "Sign in to access the inspection portal",
     "email": "Email",
     "password": "Password",
     "emailPlaceholder": "you@example.com",
@@ -184,7 +184,7 @@
   },
   "activate": {
     "title": "Set Your Password",
-    "subtitle": "Choose a password for your KCB Dashboard account",
+    "subtitle": "Choose a password for your KCB Portal account",
     "password": "Password",
     "confirmPassword": "Confirm password",
     "passwordPlaceholder": "Min. 8 characters",

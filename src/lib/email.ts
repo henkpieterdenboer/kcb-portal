@@ -36,7 +36,7 @@ export async function sendEmail(
   html: string
 ): Promise<void> {
   const transport = await getTransporter();
-  const from = process.env.SMTP_FROM || "KCB Dashboard <noreply@kcb.nl>";
+  const from = process.env.SMTP_FROM || "KCB Portal <noreply@kcb.nl>";
 
   const info = await transport.sendMail({ from, to, subject, html });
 

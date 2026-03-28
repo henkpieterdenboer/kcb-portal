@@ -7,11 +7,11 @@
     "emailLog": "E-maillog",
     "users": "Gebruikers",
     "signOut": "Uitloggen",
-    "appTitle": "KCB Dashboard"
+    "appTitle": "KCB Portal"
   },
   "auth": {
-    "title": "KCB Dashboard",
-    "subtitle": "Log in om het inspectiedashboard te openen",
+    "title": "KCB Portal",
+    "subtitle": "Log in om het inspectieportaal te openen",
     "email": "E-mail",
     "password": "Wachtwoord",
     "emailPlaceholder": "u@voorbeeld.nl",
@@ -184,7 +184,7 @@
   },
   "activate": {
     "title": "Stel uw wachtwoord in",
-    "subtitle": "Kies een wachtwoord voor uw KCB Dashboard-account",
+    "subtitle": "Kies een wachtwoord voor uw KCB Portal-account",
     "password": "Wachtwoord",
     "confirmPassword": "Bevestig wachtwoord",
     "passwordPlaceholder": "Min. 8 tekens",

@@ -36,7 +36,7 @@ export async function POST(
   const resetUrl = `${appUrl}/reset-password/${resetToken}`;
 
   try {
-    await sendEmail(user.email, "Reset your password — KCB Dashboard", resetPasswordEmailTemplate(user.name, resetUrl));
+    await sendEmail(user.email, "Reset your password — KCB Portal", resetPasswordEmailTemplate(user.name, resetUrl));
   } catch (err) {
     console.error("Failed to send reset email:", err);
     return NextResponse.json({ error: "Failed to send email" }, { status: 500 });

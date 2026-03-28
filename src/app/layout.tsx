@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KCB Inspection Dashboard",
+  title: "KCB Inspection Portal",
   description: "Phytosanitary inspection tracking for flower imports",
 };
 

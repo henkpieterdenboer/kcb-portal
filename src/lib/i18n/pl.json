@@ -7,11 +7,11 @@
     "emailLog": "Dziennik e-mail",
     "users": "Uzytkownicy",
     "signOut": "Wyloguj",
-    "appTitle": "KCB Panel"
+    "appTitle": "KCB Portal"
   },
   "auth": {
-    "title": "KCB Panel",
-    "subtitle": "Zaloguj sie, aby uzyskac dostep do panelu inspekcji",
+    "title": "KCB Portal",
+    "subtitle": "Zaloguj sie, aby uzyskac dostep do portalu inspekcji",
     "email": "E-mail",
     "password": "Haslo",
     "emailPlaceholder": "ty@przyklad.pl",
@@ -184,7 +184,7 @@
   },
   "activate": {
     "title": "Ustaw swoje haslo",
-    "subtitle": "Wybierz haslo do swojego konta KCB Dashboard",
+    "subtitle": "Wybierz haslo do swojego konta KCB Portal",
     "password": "Haslo",
     "confirmPassword": "Potwierdz haslo",
     "passwordPlaceholder": "Min. 8 znakow",

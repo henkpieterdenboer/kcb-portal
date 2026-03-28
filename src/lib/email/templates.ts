@@ -13,7 +13,7 @@ function emailLayout(content: string): string {
         <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;border:1px solid #e5e7eb;">
           <tr>
             <td style="padding:32px 40px 0;">
-              <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#111827;">KCB Dashboard</h1>
+              <h1 style="margin:0 0 8px;font-size:20px;font-weight:700;color:#111827;">KCB Portal</h1>
               <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
             </td>
           </tr>
@@ -24,7 +24,7 @@ function emailLayout(content: string): string {
           </tr>
           <tr>
             <td style="padding:16px 40px;background-color:#f9fafb;border-top:1px solid #e5e7eb;border-radius:0 0 8px 8px;">
-              <p style="margin:0;font-size:12px;color:#6b7280;">This is an automated message from the KCB Dashboard.</p>
+              <p style="margin:0;font-size:12px;color:#6b7280;">This is an automated message from the KCB Portal.</p>
             </td>
           </tr>
         </table>
@@ -52,7 +52,7 @@ export function activationEmailTemplate(name: string, url: string): string {
   return emailLayout(`
     <h2 style="margin:0 0 16px;font-size:18px;font-weight:600;color:#111827;">Welcome, ${name}!</h2>
     <p style="margin:0 0 16px;font-size:14px;color:#374151;line-height:1.6;">
-      An account has been created for you on the KCB Dashboard. Please set your password by clicking the button below.
+      An account has been created for you on the KCB Portal. Please set your password by clicking the button below.
     </p>
     <p style="margin:0 0 24px;text-align:center;">
       ${emailButton(url, "Set your password")}
