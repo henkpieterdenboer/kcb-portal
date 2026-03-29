@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
     where.OR = [
       { subject: { contains: search, mode: "insensitive" } },
       { fromAddress: { contains: search, mode: "insensitive" } },
+      { shipments: { some: { awb: { contains: search, mode: "insensitive" } } } },
     ];
   }
 
