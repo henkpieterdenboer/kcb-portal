@@ -447,6 +447,9 @@ export async function parseEmailBody(
 
   const aangiftenummer = aanMatch[1].trim();
 
+  // Validate format: must start with NL followed by digits (reject English label text)
+  if (!/^NL\d/i.test(aangiftenummer)) return null;
+
   // Extract fields from body
   function extractBodyField(label: string): string | null {
     const regex = new RegExp(`${label}[ \\t]*:[ \\t]*(.+?)(?:\\r?\\n|$)`, "i");

@@ -47,9 +47,9 @@ export async function POST(
 
   const { results, errors } = await processEmailAttachments(id, attachments);
 
-  // Also parse email body for structured fields (same as initial ingestion)
-  // Try plain text first, fall back to HTML body
-  {
+  // Parse email body only when no PDFs were successfully processed (planning emails).
+  const hasPdfResults = results.some((r) => r.success);
+  if (!hasPdfResults) {
     let bodyResult = null;
     if (ingestion.emailBody) {
       try {

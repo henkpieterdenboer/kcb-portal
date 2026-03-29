@@ -45,9 +45,10 @@ export async function POST(request: NextRequest) {
     attachments
   );
 
-  // Also parse email body for structured fields (KCB planning/notification emails)
-  // Try plain text first, fall back to HTML body (KCB often only includes data in HTML part)
-  {
+  // Parse email body only when no PDFs were successfully processed (planning emails).
+  // Mededeling emails have PDFs and their body contains English labels that cause bad parses.
+  const hasPdfResults = results.some((r) => r.success);
+  if (!hasPdfResults) {
     let bodyResult = null;
     if (emailBody) {
       try {
