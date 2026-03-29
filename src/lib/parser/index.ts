@@ -85,12 +85,6 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
     ? { emailIngestions: { connect: { id: emailIngestionId } } }
     : {};
 
-  // Check current status before upserting
-  const existing = await prisma.shipment.findUnique({
-    where: { aangiftenummer: data.aangiftenummer },
-    select: { status: true },
-  });
-
   const shipment = await shipmentUpsert({
     where: { aangiftenummer: data.aangiftenummer },
     create: {
@@ -134,8 +128,13 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
     },
   });
 
-  // Only create status history entry if status actually changed
-  if (!existing || existing.status !== data.status) {
+  // Only create status history entry if most recent entry differs (race-condition safe)
+  const lastHistory = await prisma.statusHistory.findFirst({
+    where: { shipmentId: shipment.id },
+    orderBy: { timestamp: "desc" },
+    select: { status: true },
+  });
+  if (!lastHistory || lastHistory.status !== data.status) {
     await prisma.statusHistory.create({
       data: {
         shipmentId: shipment.id,
@@ -258,8 +257,13 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
       data: shipmentUpdateData,
     });
 
-    // Only create status history entry if status actually changed
-    if (!current || current.status !== newStatus) {
+    // Only create status history entry if most recent entry differs (race-condition safe)
+    const lastHistory = await prisma.statusHistory.findFirst({
+      where: { shipmentId },
+      orderBy: { timestamp: "desc" },
+      select: { status: true },
+    });
+    if (!lastHistory || lastHistory.status !== newStatus) {
       await prisma.statusHistory.create({
         data: {
           shipmentId,
@@ -342,12 +346,6 @@ async function processBlokkade(text: string, emailIngestionId?: string): Promise
       ? { emailIngestions: { connect: { id: emailIngestionId } } }
       : {};
 
-    // Check current status before upserting
-    const existingBlockade = await prisma.shipment.findUnique({
-      where: { aangiftenummer: data.aangiftenummer },
-      select: { status: true },
-    });
-
     const shipment = await shipmentUpsert({
       where: { aangiftenummer: data.aangiftenummer },
       create: {
@@ -366,8 +364,13 @@ async function processBlokkade(text: string, emailIngestionId?: string): Promise
     });
     shipmentId = shipment.id;
 
-    // Only create status history entry if status actually changed
-    if (!existingBlockade || existingBlockade.status !== "GEBLOKKEERD") {
+    // Only create status history entry if most recent entry differs (race-condition safe)
+    const lastHistory = await prisma.statusHistory.findFirst({
+      where: { shipmentId: shipment.id },
+      orderBy: { timestamp: "desc" },
+      select: { status: true },
+    });
+    if (!lastHistory || lastHistory.status !== "GEBLOKKEERD") {
       await prisma.statusHistory.create({
         data: {
           shipmentId: shipment.id,
