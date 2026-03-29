@@ -31,6 +31,21 @@ import { Mail, Search, ChevronDown, ChevronUp, FileDown, Paperclip, RotateCw } f
 import { toast } from "sonner";
 import { useTranslation } from "@/lib/i18n/context";
 
+/**
+ * Shorten long aangiftenummer patterns in email subjects so the rest of the
+ * subject line stays visible. E.g.:
+ *   "KCB: NL813909867.002600022440 status vooraanmelding" →
+ *   "KCB: NL...0022440 status vooraanmelding"
+ */
+function shortenSubject(subject: string | null): string {
+  if (!subject) return "-";
+  // Match patterns like NL813909867.002600022440 (long dotted numbers)
+  return subject.replace(
+    /\b(NL)\d{6,}\.(\d{4,})/g,
+    (_, prefix, afterDot) => `${prefix}...${afterDot.slice(-7)}`
+  );
+}
+
 interface LinkedShipment {
   id: string;
   aangiftenummer: string;
@@ -212,7 +227,7 @@ export function EmailIngestionLog() {
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm font-medium truncate">{ing.subject || "-"}</div>
+                    <div className="text-sm font-medium truncate">{shortenSubject(ing.subject)}</div>
                     <div className="text-xs text-gray-500 mt-0.5 truncate">{ing.fromAddress || "-"}</div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
@@ -278,7 +293,7 @@ export function EmailIngestionLog() {
                         })}
                       </TableCell>
                       <TableCell className="max-w-[250px] truncate" title={ing.subject || ""}>
-                        {ing.subject || "-"}
+                        {shortenSubject(ing.subject)}
                       </TableCell>
                       <TableCell className="max-w-[200px] truncate">
                         {ing.fromAddress || "-"}
