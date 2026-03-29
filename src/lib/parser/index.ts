@@ -167,8 +167,7 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
 }
 
 async function processInspectie(text: string, emailIngestionId?: string): Promise<ParseResult> {
-  // Temporary debug: log first 1000 chars to find AWB label format
-  console.log("[DEBUG INSPECTIE TEXT]", text.substring(0, 1000));
+
 
   const data = parseInspectie(text);
   if (!data) return { type: "INSPECTIE", success: false, error: "Failed to parse inspection report" };
@@ -409,24 +408,46 @@ async function processBlokkade(text: string, emailIngestionId?: string): Promise
 }
 
 /**
+ * Strip HTML tags and decode common entities to get plain text.
+ */
+function stripHtml(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<\/div>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#039;/gi, "'")
+    .replace(/&apos;/gi, "'")
+    .replace(/&nbsp;/gi, " ");
+}
+
+/**
  * Parse structured fields from email body text and update the linked shipment.
  * KCB planning/notification emails contain fields like Aangiftenummer, Awb, etc.
  * in the email body rather than in PDF attachments.
+ * Accepts both plain text and HTML; HTML tags are stripped before extraction.
  */
 export async function parseEmailBody(
   emailBody: string,
   emailIngestionId: string
 ): Promise<ParseResult | null> {
-  // Extract aangiftenummer from email body
-  const aanMatch = emailBody.match(/Aangiftenummer\s*:\s*(.+?)(?:\r?\n|$)/i);
+  // Strip HTML if the body contains HTML tags
+  const text = emailBody.includes("<") ? stripHtml(emailBody) : emailBody;
+
+  // Extract aangiftenummer from email body (use [ \t]* to avoid matching across lines)
+  const aanMatch = text.match(/Aangiftenummer[ \t]*:[ \t]*(.+?)(?:\r?\n|$)/i);
   if (!aanMatch) return null;
 
   const aangiftenummer = aanMatch[1].trim();
 
   // Extract fields from body
   function extractBodyField(label: string): string | null {
-    const regex = new RegExp(`${label}\\s*:\\s*(.+?)(?:\\r?\\n|$)`, "i");
-    const m = emailBody.match(regex);
+    const regex = new RegExp(`${label}[ \\t]*:[ \\t]*(.+?)(?:\\r?\\n|$)`, "i");
+    const m = text.match(regex);
     return m ? m[1].trim() || null : null;
   }
 

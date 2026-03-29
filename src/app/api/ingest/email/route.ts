@@ -46,13 +46,24 @@ export async function POST(request: NextRequest) {
   );
 
   // Also parse email body for structured fields (KCB planning/notification emails)
-  if (emailBody) {
-    try {
-      const bodyResult = await parseEmailBody(emailBody, emailIngestion.id);
-      if (bodyResult) results.push(bodyResult);
-    } catch (err) {
-      console.error("Failed to parse email body:", err);
+  // Try plain text first, fall back to HTML body (KCB often only includes data in HTML part)
+  {
+    let bodyResult = null;
+    if (emailBody) {
+      try {
+        bodyResult = await parseEmailBody(emailBody, emailIngestion.id);
+      } catch (err) {
+        console.error("Failed to parse email body:", err);
+      }
     }
+    if (!bodyResult && emailBodyHtml) {
+      try {
+        bodyResult = await parseEmailBody(emailBodyHtml, emailIngestion.id);
+      } catch (err) {
+        console.error("Failed to parse email body HTML:", err);
+      }
+    }
+    if (bodyResult) results.push(bodyResult);
   }
 
   const shipments = results

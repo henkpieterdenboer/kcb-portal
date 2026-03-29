@@ -48,13 +48,24 @@ export async function POST(
   const { results, errors } = await processEmailAttachments(id, attachments);
 
   // Also parse email body for structured fields (same as initial ingestion)
-  if (ingestion.emailBody) {
-    try {
-      const bodyResult = await parseEmailBody(ingestion.emailBody, id);
-      if (bodyResult) results.push(bodyResult);
-    } catch (err) {
-      console.error("Failed to parse email body on reprocess:", err);
+  // Try plain text first, fall back to HTML body
+  {
+    let bodyResult = null;
+    if (ingestion.emailBody) {
+      try {
+        bodyResult = await parseEmailBody(ingestion.emailBody, id);
+      } catch (err) {
+        console.error("Failed to parse email body on reprocess:", err);
+      }
     }
+    if (!bodyResult && ingestion.emailBodyHtml) {
+      try {
+        bodyResult = await parseEmailBody(ingestion.emailBodyHtml, id);
+      } catch (err) {
+        console.error("Failed to parse email body HTML on reprocess:", err);
+      }
+    }
+    if (bodyResult) results.push(bodyResult);
   }
 
   const shipments = results
