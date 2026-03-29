@@ -52,11 +52,11 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
   ];
 
   const bottomNav = [
-    { name: t("nav.settings"), href: "/settings", icon: Settings },
     ...(isAdmin ? [
-      { name: t("nav.users"), href: "/settings/users", icon: Users },
       { name: t("nav.emailLog"), href: "/settings/emails", icon: Mail },
+      { name: t("nav.users"), href: "/settings/users", icon: Users },
     ] : []),
+    { name: t("nav.settings"), href: "/settings", icon: Settings },
   ];
 
   function isActive(href: string) {
