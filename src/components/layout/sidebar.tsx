@@ -31,6 +31,7 @@ const languages: { value: Language; label: string }[] = [
   { value: "en", label: "English" },
   { value: "nl", label: "Nederlands" },
   { value: "pl", label: "Polski" },
+  { value: "es", label: "Espanol" },
 ];
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {

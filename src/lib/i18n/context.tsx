@@ -11,10 +11,11 @@ import {
 import en from "./en.json";
 import nl from "./nl.json";
 import pl from "./pl.json";
+import es from "./es.json";
 
-export type Language = "en" | "nl" | "pl";
+export type Language = "en" | "nl" | "pl" | "es";
 
-const translations: Record<Language, Record<string, unknown>> = { en, nl, pl };
+const translations: Record<Language, Record<string, unknown>> = { en, nl, pl, es };
 
 interface I18nContextValue {
   language: Language;
