@@ -18,12 +18,10 @@ interface StatusTimelineProps {
 }
 
 export function StatusTimeline({ history, onViewEmail }: StatusTimelineProps) {
-  const emailSources = ["MEDEDELING", "INSPECTIERAPPORT", "BLOKKADERAPPORT", "PLANNING_EMAIL"];
-
   return (
     <div className="space-y-4">
       {history.map((entry, i) => {
-        const hasEmail = onViewEmail && entry.emailIngestionId && entry.source && emailSources.includes(entry.source);
+        const hasEmail = onViewEmail && entry.emailIngestionId;
         return (
           <div key={entry.id} className="flex gap-4">
             <div className="flex flex-col items-center">
