@@ -515,7 +515,7 @@ export default function ShipmentDetailPage() {
               {/* Email body */}
               {emailSheet.emailBodyHtml ? (
                 <div
-                  className="prose prose-sm max-w-none rounded-md border p-4"
+                  className="prose prose-sm max-w-none rounded-md border p-4 whitespace-pre-wrap"
                   dangerouslySetInnerHTML={{ __html: emailSheet.emailBodyHtml }}
                 />
               ) : emailSheet.emailBody ? (
