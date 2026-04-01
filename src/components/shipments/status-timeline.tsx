@@ -9,11 +9,12 @@ interface StatusEntry {
   source: string | null;
   details: string | null;
   timestamp: string;
+  emailIngestionId?: string | null;
 }
 
 interface StatusTimelineProps {
   history: StatusEntry[];
-  onViewEmail?: () => void;
+  onViewEmail?: (emailIngestionId: string) => void;
 }
 
 export function StatusTimeline({ history, onViewEmail }: StatusTimelineProps) {
@@ -22,7 +23,7 @@ export function StatusTimeline({ history, onViewEmail }: StatusTimelineProps) {
   return (
     <div className="space-y-4">
       {history.map((entry, i) => {
-        const hasEmail = onViewEmail && entry.source && emailSources.includes(entry.source);
+        const hasEmail = onViewEmail && entry.emailIngestionId && entry.source && emailSources.includes(entry.source);
         return (
           <div key={entry.id} className="flex gap-4">
             <div className="flex flex-col items-center">
@@ -35,7 +36,7 @@ export function StatusTimeline({ history, onViewEmail }: StatusTimelineProps) {
                 {entry.source && (
                   hasEmail ? (
                     <button
-                      onClick={onViewEmail}
+                      onClick={() => onViewEmail!(entry.emailIngestionId!)}
                       className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline"
                     >
                       <Mail className="h-3 w-3" />

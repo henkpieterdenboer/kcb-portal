@@ -82,6 +82,7 @@ interface ShipmentDetail {
     source: string | null;
     details: string | null;
     timestamp: string;
+    emailIngestionId: string | null;
   }>;
   emailIngestions: Array<{
     id: string;
@@ -385,7 +386,7 @@ export default function ShipmentDetailPage() {
         <CardContent>
           <StatusTimeline
             history={shipment.statusHistory}
-            onViewEmail={shipment.emailIngestions.length > 0 ? () => openEmailDetail(shipment.emailIngestions[0].id) : undefined}
+            onViewEmail={(emailId) => openEmailDetail(emailId)}
           />
         </CardContent>
       </Card>

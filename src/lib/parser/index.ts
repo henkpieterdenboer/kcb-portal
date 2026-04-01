@@ -141,6 +141,7 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
         status: data.status,
         source: "MEDEDELING",
         details: `Status update from Mededeling PDF`,
+        emailIngestionId: emailIngestionId || undefined,
       },
     });
   }
@@ -270,6 +271,7 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
           status: newStatus,
           source: "INSPECTIERAPPORT",
           details: `Inspection report ${data.rapportnummer}: ${overallStatus}`,
+          emailIngestionId: emailIngestionId || undefined,
         },
       });
     }
@@ -377,6 +379,7 @@ async function processBlokkade(text: string, emailIngestionId?: string): Promise
           status: "GEBLOKKEERD",
           source: "BLOKKADERAPPORT",
           details: `Blockade: ${data.reden || "Unknown reason"}`,
+          emailIngestionId: emailIngestionId || undefined,
         },
       });
     }

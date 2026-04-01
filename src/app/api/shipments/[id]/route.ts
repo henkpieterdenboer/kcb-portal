@@ -21,7 +21,17 @@ export async function GET(
       inspectionReports: { orderBy: { createdAt: "desc" } },
       sampleReports: { orderBy: { createdAt: "desc" } },
       blockadeReports: { orderBy: { createdAt: "desc" } },
-      statusHistory: { orderBy: { timestamp: "desc" } },
+      statusHistory: {
+        orderBy: { timestamp: "desc" },
+        select: {
+          id: true,
+          status: true,
+          source: true,
+          details: true,
+          timestamp: true,
+          emailIngestionId: true,
+        },
+      },
       emailIngestions: {
         select: {
           id: true,

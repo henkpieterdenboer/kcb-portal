@@ -159,14 +159,16 @@ model BlockadeReport {
 }
 
 model StatusHistory {
-  id         String   @id @default(uuid())
-  shipmentId String   @map("shipment_id")
-  status     String
-  source     String?
-  details    String?
-  timestamp  DateTime @default(now())
+  id               String          @id @default(uuid())
+  shipmentId       String          @map("shipment_id")
+  status           String
+  source           String?
+  details          String?
+  timestamp        DateTime        @default(now())
+  emailIngestionId String?         @map("email_ingestion_id")
 
-  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  shipment       Shipment        @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  emailIngestion EmailIngestion? @relation(fields: [emailIngestionId], references: [id])
 
   @@map("status_history")
 }
@@ -184,6 +186,7 @@ model EmailIngestion {
   emailBodyHtml   String?   @map("email_body_html")
   rawPayload      Json?     @map("raw_payload")
   shipments       Shipment[]
+  statusHistories StatusHistory[]
 
   @@map("email_ingestions")
 }
