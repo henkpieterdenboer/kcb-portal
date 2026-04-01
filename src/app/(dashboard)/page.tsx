@@ -58,7 +58,8 @@ export default function DashboardPage() {
 
   const fetchData = useCallback(() => {
     setLoading(true);
-    const dateParam = currentDate.toISOString().split("T")[0];
+    // Use local date components to avoid UTC date shift (e.g. 00:30 CEST = previous day in UTC)
+    const dateParam = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}`;
     fetch(`/api/dashboard/stats?date=${dateParam}`)
       .then((res) => res.json())
       .then(setData)

@@ -13,12 +13,10 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get("date");
 
-  // Target date for "today" queries
-  const targetDate = dateParam ? new Date(dateParam) : new Date();
-  const startOfDay = new Date(targetDate);
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date(targetDate);
-  endOfDay.setHours(23, 59, 59, 999);
+  // Target date for "today" queries — use explicit UTC to avoid timezone drift
+  const dateStr = dateParam || new Date().toISOString().split("T")[0];
+  const startOfDay = new Date(dateStr + "T00:00:00.000Z");
+  const endOfDay = new Date(dateStr + "T23:59:59.999Z");
 
   const [
     counts,
