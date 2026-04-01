@@ -567,7 +567,7 @@ export async function parseEmailBody(
     where: { id: emailIngestionId },
     select: { subject: true },
   });
-  const subjectMatch = emailRecord?.subject?.match(/ingepland op:?\s*[&apos;'']?(\d{2})-(\d{2})-(\d{4})\s+(\d{2}):(\d{2})/i);
+  const subjectMatch = emailRecord?.subject?.match(/ingepland op:?\s*(?:&apos;|[''])?(\d{2})-(\d{2})-(\d{4})\s+(\d{2}):(\d{2})/i);
   if (subjectMatch) {
     // Confirmed time from subject
     inspectiedatum = new Date(Date.UTC(
