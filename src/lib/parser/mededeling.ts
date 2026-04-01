@@ -132,6 +132,13 @@ export function parseMededeling(text: string): MededelingData | null {
     rawStatus = "Goedgekeurd";
   }
 
+  // "Fysieke inspectie" in a mededeling means the shipment was selected for
+  // physical inspection (= requested), not that the inspection is in progress.
+  // The actual inspection is reported separately via an inspectierapport.
+  if (rawStatus.trim().toLowerCase() === "fysieke inspectie") {
+    rawStatus = "Inspectie aangevraagd";
+  }
+
   const aangever = extractField(text, "Aangever");
   const relatieRaw = extractField(text, "Relatienr \\+ naam");
   let relatienummer: string | null = null;
