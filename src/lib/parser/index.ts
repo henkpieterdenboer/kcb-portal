@@ -154,24 +154,38 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
     });
   }
 
-  // Only create status history entry if status actually advanced
-  if (statusAdvanced) {
-    // Double-check against last history entry to avoid duplicates (race-condition safe)
+  // Always record a status history entry for each mededeling email.
+  // On reprocess: replace old entry for this email to reflect latest parse result.
+  // Without emailIngestionId: fall back to status-based dedup (legacy/manual).
+  if (emailIngestionId) {
+    await prisma.statusHistory.deleteMany({
+      where: { shipmentId: shipment.id, emailIngestionId },
+    });
+    const timestamp = await getEmailTimestamp(emailIngestionId);
+    await prisma.statusHistory.create({
+      data: {
+        shipmentId: shipment.id,
+        status: data.status,
+        source: "MEDEDELING",
+        details: `Status update from Mededeling PDF`,
+        emailIngestionId,
+        timestamp,
+      },
+    });
+  } else if (statusAdvanced) {
     const lastHistory = await prisma.statusHistory.findFirst({
       where: { shipmentId: shipment.id },
       orderBy: { timestamp: "desc" },
       select: { status: true },
     });
     if (!lastHistory || lastHistory.status !== data.status) {
-      const timestamp = await getEmailTimestamp(emailIngestionId);
       await prisma.statusHistory.create({
         data: {
           shipmentId: shipment.id,
           status: data.status,
           source: "MEDEDELING",
           details: `Status update from Mededeling PDF`,
-          emailIngestionId: emailIngestionId || undefined,
-          timestamp,
+          timestamp: new Date(),
         },
       });
     }
@@ -298,23 +312,37 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
       });
     }
 
-    // Only create status history entry if status actually advanced
-    if (shouldAdvance) {
+    // Always record status history for inspectie emails (definitive result).
+    // On reprocess: replace old entry for this email.
+    if (emailIngestionId) {
+      await prisma.statusHistory.deleteMany({
+        where: { shipmentId, emailIngestionId },
+      });
+      const timestamp = await getEmailTimestamp(emailIngestionId);
+      await prisma.statusHistory.create({
+        data: {
+          shipmentId,
+          status: newStatus,
+          source: "INSPECTIERAPPORT",
+          details: `Inspection report ${data.rapportnummer}: ${overallStatus}`,
+          emailIngestionId,
+          timestamp,
+        },
+      });
+    } else if (shouldAdvance) {
       const lastHistory = await prisma.statusHistory.findFirst({
         where: { shipmentId },
         orderBy: { timestamp: "desc" },
         select: { status: true },
       });
       if (!lastHistory || lastHistory.status !== newStatus) {
-        const timestamp = await getEmailTimestamp(emailIngestionId);
         await prisma.statusHistory.create({
           data: {
             shipmentId,
             status: newStatus,
             source: "INSPECTIERAPPORT",
             details: `Inspection report ${data.rapportnummer}: ${overallStatus}`,
-            emailIngestionId: emailIngestionId || undefined,
-            timestamp,
+            timestamp: new Date(),
           },
         });
       }
@@ -410,13 +438,12 @@ async function processBlokkade(text: string, emailIngestionId?: string): Promise
     });
     shipmentId = shipment.id;
 
-    // Only create status history entry if most recent entry differs (race-condition safe)
-    const lastHistory = await prisma.statusHistory.findFirst({
-      where: { shipmentId: shipment.id },
-      orderBy: { timestamp: "desc" },
-      select: { status: true },
-    });
-    if (!lastHistory || lastHistory.status !== "GEBLOKKEERD") {
+    // Always record status history for blokkade emails (definitive action).
+    // On reprocess: replace old entry for this email.
+    if (emailIngestionId) {
+      await prisma.statusHistory.deleteMany({
+        where: { shipmentId: shipment.id, emailIngestionId },
+      });
       const timestamp = await getEmailTimestamp(emailIngestionId);
       await prisma.statusHistory.create({
         data: {
@@ -424,10 +451,27 @@ async function processBlokkade(text: string, emailIngestionId?: string): Promise
           status: "GEBLOKKEERD",
           source: "BLOKKADERAPPORT",
           details: `Blockade: ${data.reden || "Unknown reason"}`,
-          emailIngestionId: emailIngestionId || undefined,
+          emailIngestionId,
           timestamp,
         },
       });
+    } else {
+      const lastHistory = await prisma.statusHistory.findFirst({
+        where: { shipmentId: shipment.id },
+        orderBy: { timestamp: "desc" },
+        select: { status: true },
+      });
+      if (!lastHistory || lastHistory.status !== "GEBLOKKEERD") {
+        await prisma.statusHistory.create({
+          data: {
+            shipmentId: shipment.id,
+            status: "GEBLOKKEERD",
+            source: "BLOKKADERAPPORT",
+            details: `Blockade: ${data.reden || "Unknown reason"}`,
+            timestamp: new Date(),
+          },
+        });
+      }
     }
   }
 
