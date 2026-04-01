@@ -192,7 +192,7 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
         status: "DOCUMENTCONTROLE",
         ...emailConnect,
       },
-      update: {},
+      update: emailConnect,
     });
     shipmentId = shipment.id;
   }
