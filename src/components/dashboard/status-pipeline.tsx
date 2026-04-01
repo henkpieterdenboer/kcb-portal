@@ -23,12 +23,21 @@ const stageColors: Record<string, string> = {
   GEBLOKKEERD: "bg-red-500",
 };
 
-// Sub-statuses within the Physical Inspection track
-const inspectionSubStatuses = [
+// All active statuses in display order
+const pipelineStatuses = [
+  "AANGEMELD",
   "INSPECTIE_AANGEVRAAGD",
   "INSPECTIE_GEPLAND",
   "FYSIEKE_INSPECTIE",
+  "DOCUMENTCONTROLE",
 ] as const;
+
+// Sub-statuses that belong to the Physical Inspection track
+const inspectionSubStatuses = new Set([
+  "INSPECTIE_AANGEVRAAGD",
+  "INSPECTIE_GEPLAND",
+  "FYSIEKE_INSPECTIE",
+]);
 
 const terminalStatuses = [
   "GOEDGEKEURD",
@@ -36,43 +45,6 @@ const terminalStatuses = [
   "WACHT_OP_VERVOLG",
   "GEBLOKKEERD",
 ] as const;
-
-function StatusButton({
-  status,
-  count,
-  isSelected,
-  isClickable,
-  onClick,
-  t,
-}: {
-  status: string;
-  count: number;
-  isSelected: boolean;
-  isClickable: boolean;
-  onClick: () => void;
-  t: (key: string) => string;
-}) {
-  return (
-    <button
-      type="button"
-      disabled={!isClickable}
-      onClick={onClick}
-      className={cn(
-        "flex w-full flex-col items-center gap-1 rounded-lg border p-2 sm:p-3 shadow-sm transition-all",
-        isClickable && "cursor-pointer hover:shadow-md hover:border-gray-300",
-        isSelected
-          ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500"
-          : "bg-white",
-      )}
-    >
-      <div className={`h-1.5 sm:h-2 w-full sm:w-16 rounded-full ${stageColors[status]}`} />
-      <span className="text-[10px] sm:text-xs font-medium text-gray-600 text-center leading-tight">
-        {t("status." + status)}
-      </span>
-      <span className="text-base sm:text-lg font-bold">{count}</span>
-    </button>
-  );
-}
 
 export function StatusPipeline({ totals, showTerminal = false, selectedStatus, onStatusClick }: StatusPipelineProps) {
   const { t } = useTranslation();
@@ -82,95 +54,72 @@ export function StatusPipeline({ totals, showTerminal = false, selectedStatus, o
     onStatusClick?.(selectedStatus === status ? null : status);
   };
 
-  const inspectionTotal = inspectionSubStatuses.reduce((sum, s) => sum + (totals[s] || 0), 0);
-  const anyInspectionSelected = inspectionSubStatuses.some(s => selectedStatus === s);
-
   return (
     <div className="space-y-3">
-      <div className="flex flex-col sm:flex-row gap-3">
-        {/* Registered */}
-        <div className="flex items-center gap-2 shrink-0">
-          <StatusButton
-            status="AANGEMELD"
-            count={totals["AANGEMELD"] || 0}
-            isSelected={selectedStatus === "AANGEMELD"}
-            isClickable={isClickable}
-            onClick={() => handleClick("AANGEMELD")}
-            t={t}
-          />
-          <ChevronRight className="hidden sm:block h-4 w-4 text-gray-400 shrink-0" />
-        </div>
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
+        {pipelineStatuses.map((status, i) => {
+          const isSelected = selectedStatus === status;
+          // Insert separator before Document Control
+          const showSeparator = status === "DOCUMENTCONTROLE";
+          // Show chevron between inspection-track cards
+          const showChevron = i < pipelineStatuses.length - 1 && !showSeparator;
 
-        {/* Physical Inspection group */}
-        <div
-          className={cn(
-            "flex-1 rounded-lg border p-2 sm:p-3 transition-all",
-            anyInspectionSelected ? "border-yellow-300 bg-yellow-50/30" : "border-gray-200 bg-gray-50/50",
-          )}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <div className="h-2 w-8 rounded-full bg-yellow-500" />
-            <span className="text-xs font-semibold text-gray-700">
-              {t("status.FYSIEKE_INSPECTIE")}
-            </span>
-            <span className="text-xs font-bold text-gray-500">{inspectionTotal}</span>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            {inspectionSubStatuses.map((status) => (
+          return (
+            <div key={status} className="flex items-center flex-1 min-w-0">
+              {showSeparator && (
+                <div className="hidden sm:flex items-center px-2 self-stretch">
+                  <div className="h-full w-px bg-gray-200" />
+                </div>
+              )}
+              {showChevron && i > 0 && (
+                <ChevronRight className="hidden sm:block h-4 w-4 text-gray-400 shrink-0 -ml-1 mr-1" />
+              )}
               <button
-                key={status}
                 type="button"
                 disabled={!isClickable}
                 onClick={() => handleClick(status)}
                 className={cn(
-                  "flex flex-col items-center gap-0.5 rounded-md border p-1.5 sm:p-2 text-center transition-all",
-                  isClickable && "cursor-pointer hover:shadow-sm hover:border-gray-300",
-                  selectedStatus === status
+                  "flex w-full flex-col items-center gap-1 rounded-lg border p-2 sm:p-3 shadow-sm transition-all",
+                  isClickable && "cursor-pointer hover:shadow-md hover:border-gray-300",
+                  isSelected
                     ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500"
                     : "bg-white",
                 )}
               >
-                <div className={`h-1 w-full rounded-full ${stageColors[status]}`} />
-                <span className="text-[9px] sm:text-[10px] font-medium text-gray-600 leading-tight">
+                <div className={`h-1.5 sm:h-2 w-full rounded-full ${stageColors[status]}`} />
+                <span className="text-[10px] sm:text-xs font-medium text-gray-600 text-center leading-tight">
                   {t("status." + status)}
                 </span>
-                <span className="text-sm sm:text-base font-bold">{totals[status] || 0}</span>
+                <span className="text-base sm:text-lg font-bold">{totals[status] || 0}</span>
               </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Separator */}
-        <div className="hidden sm:flex items-center px-1">
-          <div className="h-full w-px bg-gray-200" />
-        </div>
-
-        {/* Document Control */}
-        <div className="flex items-center shrink-0">
-          <StatusButton
-            status="DOCUMENTCONTROLE"
-            count={totals["DOCUMENTCONTROLE"] || 0}
-            isSelected={selectedStatus === "DOCUMENTCONTROLE"}
-            isClickable={isClickable}
-            onClick={() => handleClick("DOCUMENTCONTROLE")}
-            t={t}
-          />
-        </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Terminal statuses (optional) */}
       {showTerminal && (
         <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
           {terminalStatuses.map((status) => (
-            <StatusButton
+            <button
               key={status}
-              status={status}
-              count={totals[status] || 0}
-              isSelected={selectedStatus === status}
-              isClickable={isClickable}
+              type="button"
+              disabled={!isClickable}
               onClick={() => handleClick(status)}
-              t={t}
-            />
+              className={cn(
+                "flex flex-col items-center gap-1 rounded-lg border p-2 sm:p-3 shadow-sm transition-all flex-1",
+                isClickable && "cursor-pointer hover:shadow-md hover:border-gray-300",
+                selectedStatus === status
+                  ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500"
+                  : "bg-white",
+              )}
+            >
+              <div className={`h-1.5 sm:h-2 w-full rounded-full ${stageColors[status]}`} />
+              <span className="text-[10px] sm:text-xs font-medium text-gray-600 text-center leading-tight">
+                {t("status." + status)}
+              </span>
+              <span className="text-base sm:text-lg font-bold">{totals[status] || 0}</span>
+            </button>
           ))}
         </div>
       )}
