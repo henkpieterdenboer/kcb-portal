@@ -30,7 +30,8 @@
     "todayArrivals": "Dzisiejsze przyjazdy",
     "noInspections": "Brak zaplanowanych inspekcji na dzisiaj",
     "noArrivals": "Brak oczekiwanych przyjazdow na dzisiaj",
-    "openShipments": "Otwarte przesylki"
+    "openShipments": "Otwarte przesylki",
+    "showDocControl": "Kontrola dokumentow"
   },
   "shipments": {
     "activeTitle": "Aktywne przesylki",

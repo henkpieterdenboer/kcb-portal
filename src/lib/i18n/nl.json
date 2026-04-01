@@ -30,7 +30,8 @@
     "todayArrivals": "Aankomsten van vandaag",
     "noInspections": "Geen inspecties gepland voor vandaag",
     "noArrivals": "Geen aankomsten verwacht vandaag",
-    "openShipments": "Open zendingen"
+    "openShipments": "Open zendingen",
+    "showDocControl": "Documentcontrole"
   },
   "shipments": {
     "activeTitle": "Actieve zendingen",

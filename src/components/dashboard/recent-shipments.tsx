@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Table,
@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Switch } from "@/components/ui/switch";
 import { StatusBadge } from "@/components/shipments/status-badge";
 import { useTranslation } from "@/lib/i18n/context";
 
@@ -31,19 +32,32 @@ interface RecentShipmentsProps {
 
 export function RecentShipments({ shipments, statusFilter }: RecentShipmentsProps) {
   const { t } = useTranslation();
+  const [showDocControl, setShowDocControl] = useState(false);
 
   const filtered = useMemo(() => {
-    if (!statusFilter) return shipments;
-    return shipments.filter((s) => s.status === statusFilter);
-  }, [shipments, statusFilter]);
+    let result = shipments;
+    if (!showDocControl) {
+      result = result.filter((s) => s.status !== "DOCUMENTCONTROLE");
+    }
+    if (statusFilter) {
+      result = result.filter((s) => s.status === statusFilter);
+    }
+    return result;
+  }, [shipments, statusFilter, showDocControl]);
 
   return (
     <div className="rounded-lg border bg-white">
       <div className="border-b px-4 py-3 flex items-center justify-between">
         <h3 className="font-semibold">{t("dashboard.openShipments")}</h3>
-        {statusFilter && (
-          <StatusBadge status={statusFilter} />
-        )}
+        <div className="flex items-center gap-3">
+          {statusFilter && (
+            <StatusBadge status={statusFilter} />
+          )}
+          <label className="flex items-center gap-2 text-sm text-gray-500 cursor-pointer">
+            <Switch checked={showDocControl} onCheckedChange={setShowDocControl} />
+            {t("dashboard.showDocControl")}
+          </label>
+        </div>
       </div>
 
       {/* Mobile card view */}
