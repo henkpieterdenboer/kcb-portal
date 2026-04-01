@@ -21,7 +21,7 @@ interface DashboardData {
     awb: string | null;
     landVanOorsprong: string | null;
     status: string;
-    updatedAt: string;
+    lastStatusAt: string;
     subShipments: { botanischeNaam: string }[];
   }>;
   todayArrivals: Array<{

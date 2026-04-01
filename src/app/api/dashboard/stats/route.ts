@@ -42,6 +42,11 @@ export async function GET(request: NextRequest) {
       take: 20,
       include: {
         subShipments: true,
+        statusHistory: {
+          orderBy: { timestamp: "desc" },
+          take: 1,
+          select: { timestamp: true },
+        },
         _count: {
           select: {
             inspectionReports: true,
@@ -100,10 +105,16 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Map lastStatusAt from latest status history entry
+  const mappedRecent = recentShipments.map(({ statusHistory, ...s }) => ({
+    ...s,
+    lastStatusAt: statusHistory[0]?.timestamp ?? s.updatedAt,
+  }));
+
   return NextResponse.json({
     totals,
     activeTotals,
-    recentShipments,
+    recentShipments: mappedRecent,
     todayArrivals,
     todayInspections,
     todayStatusChanges,

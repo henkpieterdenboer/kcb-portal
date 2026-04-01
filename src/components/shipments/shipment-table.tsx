@@ -32,7 +32,7 @@ interface ShipmentRow {
   awb: string | null;
   landVanOorsprong: string | null;
   status: string;
-  updatedAt: string;
+  lastStatusAt: string;
   subShipments: { botanischeNaam: string }[];
   _count: {
     inspectionReports: number;
@@ -135,7 +135,7 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
             </div>
             <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
               {s.landVanOorsprong && <span>{s.landVanOorsprong}</span>}
-              <span>{new Date(s.updatedAt).toLocaleDateString("nl-NL")}</span>
+              <span>{new Date(s.lastStatusAt).toLocaleDateString("nl-NL")}</span>
             </div>
             {s.subShipments.length > 0 && (
               <div className="mt-1 text-xs text-gray-400 truncate">
@@ -184,7 +184,7 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
                   <StatusBadge status={s.status} />
                 </TableCell>
                 <TableCell className="text-sm text-gray-500">
-                  {new Date(s.updatedAt).toLocaleDateString("nl-NL")}
+                  {new Date(s.lastStatusAt).toLocaleDateString("nl-NL")}
                 </TableCell>
               </TableRow>
             ))}

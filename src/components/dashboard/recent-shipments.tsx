@@ -20,7 +20,7 @@ interface ShipmentRow {
   awb: string | null;
   landVanOorsprong: string | null;
   status: string;
-  updatedAt: string;
+  lastStatusAt: string;
   subShipments: { botanischeNaam: string }[];
 }
 
@@ -65,7 +65,7 @@ export function RecentShipments({ shipments, statusFilter }: RecentShipmentsProp
             </div>
             <div className="mt-1 flex items-center gap-3 text-xs text-gray-400">
               {s.landVanOorsprong && <span>{s.landVanOorsprong}</span>}
-              <span>{new Date(s.updatedAt).toLocaleDateString("nl-NL")}</span>
+              <span>{new Date(s.lastStatusAt).toLocaleDateString("nl-NL")}</span>
             </div>
           </Link>
         ))}
@@ -104,7 +104,7 @@ export function RecentShipments({ shipments, statusFilter }: RecentShipmentsProp
                   <StatusBadge status={s.status} />
                 </TableCell>
                 <TableCell className="text-sm text-gray-500">
-                  {new Date(s.updatedAt).toLocaleDateString("nl-NL")}
+                  {new Date(s.lastStatusAt).toLocaleDateString("nl-NL")}
                 </TableCell>
               </TableRow>
             ))}

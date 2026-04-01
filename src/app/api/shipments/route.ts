@@ -55,6 +55,11 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         subShipments: true,
+        statusHistory: {
+          orderBy: { timestamp: "desc" },
+          take: 1,
+          select: { timestamp: true },
+        },
         _count: {
           select: {
             inspectionReports: true,
@@ -70,8 +75,14 @@ export async function GET(request: NextRequest) {
     prisma.shipment.count({ where }),
   ]);
 
+  // Map lastStatusAt from latest status history entry
+  const mapped = shipments.map(({ statusHistory, ...s }) => ({
+    ...s,
+    lastStatusAt: statusHistory[0]?.timestamp ?? s.updatedAt,
+  }));
+
   return NextResponse.json({
-    shipments,
+    shipments: mapped,
     pagination: {
       total,
       page,
