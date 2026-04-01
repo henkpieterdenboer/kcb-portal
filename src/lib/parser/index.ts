@@ -6,7 +6,7 @@ import { parseInspectie } from "./inspectie";
 import { parseMonster } from "./monster";
 import { parseBlokkade } from "./blokkade";
 import { prisma } from "../db";
-import { normalizeStatus } from "@/types";
+import { normalizeStatus, statusLevel } from "@/types";
 
 /**
  * Wrapper around prisma.shipment.upsert that retries on unique constraint
@@ -85,6 +85,7 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
     ? { emailIngestions: { connect: { id: emailIngestionId } } }
     : {};
 
+  // Upsert without status in update — we handle status separately to prevent regressions
   const shipment = await shipmentUpsert({
     where: { aangiftenummer: data.aangiftenummer },
     create: {
@@ -123,27 +124,40 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
       inspectiedatum: data.inspectiedatum,
       inspectielocatie: data.inspectielocatie,
       verwachteAankomst: data.verwachteAankomst,
-      status: data.status,
+      // status intentionally omitted — handled below to prevent regressions
       ...emailConnect,
     },
+    select: { id: true, status: true },
   });
 
-  // Only create status history entry if most recent entry differs (race-condition safe)
-  const lastHistory = await prisma.statusHistory.findFirst({
-    where: { shipmentId: shipment.id },
-    orderBy: { timestamp: "desc" },
-    select: { status: true },
-  });
-  if (!lastHistory || lastHistory.status !== data.status) {
-    await prisma.statusHistory.create({
-      data: {
-        shipmentId: shipment.id,
-        status: data.status,
-        source: "MEDEDELING",
-        details: `Status update from Mededeling PDF`,
-        emailIngestionId: emailIngestionId || undefined,
-      },
+  // Only advance status, never regress (e.g. GOEDGEKEURD must not go back to AANGEMELD)
+  const statusAdvanced = statusLevel(data.status) >= statusLevel(shipment.status) && shipment.status !== data.status;
+  if (statusAdvanced) {
+    await prisma.shipment.update({
+      where: { id: shipment.id },
+      data: { status: data.status },
     });
+  }
+
+  // Only create status history entry if status actually advanced
+  if (statusAdvanced) {
+    // Double-check against last history entry to avoid duplicates (race-condition safe)
+    const lastHistory = await prisma.statusHistory.findFirst({
+      where: { shipmentId: shipment.id },
+      orderBy: { timestamp: "desc" },
+      select: { status: true },
+    });
+    if (!lastHistory || lastHistory.status !== data.status) {
+      await prisma.statusHistory.create({
+        data: {
+          shipmentId: shipment.id,
+          status: data.status,
+          source: "MEDEDELING",
+          details: `Status update from Mededeling PDF`,
+          emailIngestionId: emailIngestionId || undefined,
+        },
+      });
+    }
   }
 
   // Upsert sub-shipments (delete old, create new)
@@ -245,35 +259,46 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
     },
   });
 
-  // Update shipment status and fill in AWB/BOL if missing
+  // Update shipment status (only advance, never regress) and fill in AWB/BOL if missing
   if (shipmentId) {
     const newStatus = normalizeStatus(overallStatus);
     const current = await prisma.shipment.findUnique({ where: { id: shipmentId }, select: { awb: true, bol: true, status: true } });
-    const shipmentUpdateData: Record<string, unknown> = { status: newStatus };
+    const shipmentUpdateData: Record<string, unknown> = {};
+
+    // Only advance status, never regress
+    const shouldAdvance = current && statusLevel(newStatus) >= statusLevel(current.status) && current.status !== newStatus;
+    if (shouldAdvance) {
+      shipmentUpdateData.status = newStatus;
+    }
+
     if (data.awbNummer && !current?.awb) shipmentUpdateData.awb = data.awbNummer;
     if (data.bolNummer && !current?.bol) shipmentUpdateData.bol = data.bolNummer;
 
-    await prisma.shipment.update({
-      where: { id: shipmentId },
-      data: shipmentUpdateData,
-    });
-
-    // Only create status history entry if most recent entry differs (race-condition safe)
-    const lastHistory = await prisma.statusHistory.findFirst({
-      where: { shipmentId },
-      orderBy: { timestamp: "desc" },
-      select: { status: true },
-    });
-    if (!lastHistory || lastHistory.status !== newStatus) {
-      await prisma.statusHistory.create({
-        data: {
-          shipmentId,
-          status: newStatus,
-          source: "INSPECTIERAPPORT",
-          details: `Inspection report ${data.rapportnummer}: ${overallStatus}`,
-          emailIngestionId: emailIngestionId || undefined,
-        },
+    if (Object.keys(shipmentUpdateData).length > 0) {
+      await prisma.shipment.update({
+        where: { id: shipmentId },
+        data: shipmentUpdateData,
       });
+    }
+
+    // Only create status history entry if status actually advanced
+    if (shouldAdvance) {
+      const lastHistory = await prisma.statusHistory.findFirst({
+        where: { shipmentId },
+        orderBy: { timestamp: "desc" },
+        select: { status: true },
+      });
+      if (!lastHistory || lastHistory.status !== newStatus) {
+        await prisma.statusHistory.create({
+          data: {
+            shipmentId,
+            status: newStatus,
+            source: "INSPECTIERAPPORT",
+            details: `Inspection report ${data.rapportnummer}: ${overallStatus}`,
+            emailIngestionId: emailIngestionId || undefined,
+          },
+        });
+      }
     }
   }
 

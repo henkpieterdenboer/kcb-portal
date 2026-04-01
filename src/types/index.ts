@@ -36,13 +36,33 @@ export const STATUS_COLORS: Record<ShipmentStatus, string> = {
   GEBLOKKEERD: "bg-red-100 text-red-800",
 };
 
-export const TERMINAL_STATUSES: ShipmentStatus[] = ["GOEDGEKEURD", "WACHT_OP_VERVOLG", "GEBLOKKEERD"];
+export const TERMINAL_STATUSES: ShipmentStatus[] = ["GOEDGEKEURD", "DOCUMENTCONTROLE_AFGEROND", "WACHT_OP_VERVOLG", "GEBLOKKEERD"];
 export const ACTIVE_STATUSES = SHIPMENT_STATUSES.filter(
   (s) => !(TERMINAL_STATUSES as string[]).includes(s)
 );
 
 export function isTerminalStatus(status: string): boolean {
   return (TERMINAL_STATUSES as string[]).includes(status);
+}
+
+/**
+ * Numeric level per status. Higher means further in the process.
+ * Used to prevent status regressions (e.g. GOEDGEKEURD -> AANGEMELD).
+ */
+const STATUS_LEVEL: Record<ShipmentStatus, number> = {
+  AANGEMELD: 0,
+  DOCUMENTCONTROLE: 1,
+  INSPECTIE_AANGEVRAAGD: 1,
+  INSPECTIE_GEPLAND: 2,
+  FYSIEKE_INSPECTIE: 3,
+  DOCUMENTCONTROLE_AFGEROND: 4,
+  GOEDGEKEURD: 4,
+  WACHT_OP_VERVOLG: 4,
+  GEBLOKKEERD: 4,
+};
+
+export function statusLevel(status: string): number {
+  return STATUS_LEVEL[status as ShipmentStatus] ?? 0;
 }
 
 export type DocumentType = "MEDEDELING" | "INSPECTIE" | "MONSTER" | "BLOKKADE" | "UNKNOWN";
