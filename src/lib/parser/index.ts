@@ -32,6 +32,21 @@ export interface ParseResult {
   error?: string;
 }
 
+/**
+ * Get the receivedAt timestamp from an email ingestion to use as status history timestamp.
+ * Falls back to now() if not available.
+ */
+async function getEmailTimestamp(emailIngestionId?: string): Promise<Date> {
+  if (emailIngestionId) {
+    const email = await prisma.emailIngestion.findUnique({
+      where: { id: emailIngestionId },
+      select: { receivedAt: true },
+    });
+    if (email?.receivedAt) return email.receivedAt;
+  }
+  return new Date();
+}
+
 async function extractTextFromPdf(buffer: Buffer): Promise<string> {
   const doc = await getDocument({
     data: new Uint8Array(buffer),
@@ -148,6 +163,7 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
       select: { status: true },
     });
     if (!lastHistory || lastHistory.status !== data.status) {
+      const timestamp = await getEmailTimestamp(emailIngestionId);
       await prisma.statusHistory.create({
         data: {
           shipmentId: shipment.id,
@@ -155,6 +171,7 @@ async function processMededeling(text: string, emailIngestionId?: string): Promi
           source: "MEDEDELING",
           details: `Status update from Mededeling PDF`,
           emailIngestionId: emailIngestionId || undefined,
+          timestamp,
         },
       });
     }
@@ -289,6 +306,7 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
         select: { status: true },
       });
       if (!lastHistory || lastHistory.status !== newStatus) {
+        const timestamp = await getEmailTimestamp(emailIngestionId);
         await prisma.statusHistory.create({
           data: {
             shipmentId,
@@ -296,6 +314,7 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
             source: "INSPECTIERAPPORT",
             details: `Inspection report ${data.rapportnummer}: ${overallStatus}`,
             emailIngestionId: emailIngestionId || undefined,
+            timestamp,
           },
         });
       }
@@ -398,6 +417,7 @@ async function processBlokkade(text: string, emailIngestionId?: string): Promise
       select: { status: true },
     });
     if (!lastHistory || lastHistory.status !== "GEBLOKKEERD") {
+      const timestamp = await getEmailTimestamp(emailIngestionId);
       await prisma.statusHistory.create({
         data: {
           shipmentId: shipment.id,
@@ -405,6 +425,7 @@ async function processBlokkade(text: string, emailIngestionId?: string): Promise
           source: "BLOKKADERAPPORT",
           details: `Blockade: ${data.reden || "Unknown reason"}`,
           emailIngestionId: emailIngestionId || undefined,
+          timestamp,
         },
       });
     }
