@@ -48,21 +48,22 @@ export async function POST(
   const { results, errors } = await processEmailAttachments(id, attachments);
 
   // Parse email body only when no PDFs were successfully processed (planning emails).
+  // Try HTML body first — KCB plain text bodies are often truncated.
   const hasPdfResults = results.some((r) => r.success);
   if (!hasPdfResults) {
     let bodyResult = null;
-    if (ingestion.emailBody) {
-      try {
-        bodyResult = await parseEmailBody(ingestion.emailBody, id);
-      } catch (err) {
-        console.error("Failed to parse email body on reprocess:", err);
-      }
-    }
-    if (!bodyResult && ingestion.emailBodyHtml) {
+    if (ingestion.emailBodyHtml) {
       try {
         bodyResult = await parseEmailBody(ingestion.emailBodyHtml, id);
       } catch (err) {
         console.error("Failed to parse email body HTML on reprocess:", err);
+      }
+    }
+    if (!bodyResult && ingestion.emailBody) {
+      try {
+        bodyResult = await parseEmailBody(ingestion.emailBody, id);
+      } catch (err) {
+        console.error("Failed to parse email body on reprocess:", err);
       }
     }
     if (bodyResult) results.push(bodyResult);

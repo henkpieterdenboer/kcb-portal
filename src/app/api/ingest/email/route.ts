@@ -47,21 +47,22 @@ export async function POST(request: NextRequest) {
 
   // Parse email body only when no PDFs were successfully processed (planning emails).
   // Mededeling emails have PDFs and their body contains English labels that cause bad parses.
+  // Try HTML body first — KCB plain text bodies are often truncated.
   const hasPdfResults = results.some((r) => r.success);
   if (!hasPdfResults) {
     let bodyResult = null;
-    if (emailBody) {
-      try {
-        bodyResult = await parseEmailBody(emailBody, emailIngestion.id);
-      } catch (err) {
-        console.error("Failed to parse email body:", err);
-      }
-    }
-    if (!bodyResult && emailBodyHtml) {
+    if (emailBodyHtml) {
       try {
         bodyResult = await parseEmailBody(emailBodyHtml, emailIngestion.id);
       } catch (err) {
         console.error("Failed to parse email body HTML:", err);
+      }
+    }
+    if (!bodyResult && emailBody) {
+      try {
+        bodyResult = await parseEmailBody(emailBody, emailIngestion.id);
+      } catch (err) {
+        console.error("Failed to parse email body:", err);
       }
     }
     if (bodyResult) results.push(bodyResult);

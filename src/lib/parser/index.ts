@@ -466,6 +466,25 @@ export async function parseEmailBody(
   const importeur = extractBodyField("Importeur");
   const aangever = extractBodyField("Aangever");
   const referentie = extractBodyField("Referentie");
+  const landVanVerzending = extractBodyField("Land van verzending");
+  const landVanOorsprong = extractBodyField("Land van oorsprong");
+  const transportNaarEU = extractBodyField("Vluchtnummer/Bootnaam");
+
+  // Parse inspection date from "Aangevraagde inspectiedatum: 20260402" + optional time "0700"
+  let inspectiedatum: Date | null = null;
+  const inspDateRaw = extractBodyField("Aangevraagde inspectiedatum");
+  if (inspDateRaw && /^\d{8}$/.test(inspDateRaw)) {
+    const y = parseInt(inspDateRaw.substring(0, 4));
+    const m = parseInt(inspDateRaw.substring(4, 6)) - 1;
+    const d = parseInt(inspDateRaw.substring(6, 8));
+    const timeRaw = extractBodyField("Aangevraagde tijd");
+    let h = 0, min = 0;
+    if (timeRaw && /^\d{4}$/.test(timeRaw)) {
+      h = parseInt(timeRaw.substring(0, 2));
+      min = parseInt(timeRaw.substring(2, 4));
+    }
+    inspectiedatum = new Date(y, m, d, h, min);
+  }
 
   const emailConnect = { emailIngestions: { connect: { id: emailIngestionId } } };
 
@@ -480,21 +499,31 @@ export async function parseEmailBody(
       bol: bol || undefined,
       exporteur: exporteur || undefined,
       importeur: importeur || undefined,
+      landVanVerzending: landVanVerzending || undefined,
+      landVanOorsprong: landVanOorsprong || undefined,
+      transportNaarEU: transportNaarEU || undefined,
+      inspectiedatum: inspectiedatum || undefined,
       status: "AANGEMELD",
       ...emailConnect,
     },
     update: {
       ...emailConnect,
     },
-    select: { id: true, awb: true, bol: true, exporteur: true, importeur: true },
+    select: { id: true, awb: true, bol: true, exporteur: true, importeur: true,
+              landVanVerzending: true, landVanOorsprong: true, transportNaarEU: true,
+              inspectiedatum: true },
   });
 
   // Back-fill missing fields on existing shipments
-  const backfill: Record<string, string> = {};
+  const backfill: Record<string, unknown> = {};
   if (awb && !shipment.awb) backfill.awb = awb;
   if (bol && !shipment.bol) backfill.bol = bol;
   if (exporteur && !shipment.exporteur) backfill.exporteur = exporteur;
   if (importeur && !shipment.importeur) backfill.importeur = importeur;
+  if (landVanVerzending && !shipment.landVanVerzending) backfill.landVanVerzending = landVanVerzending;
+  if (landVanOorsprong && !shipment.landVanOorsprong) backfill.landVanOorsprong = landVanOorsprong;
+  if (transportNaarEU && !shipment.transportNaarEU) backfill.transportNaarEU = transportNaarEU;
+  if (inspectiedatum && !shipment.inspectiedatum) backfill.inspectiedatum = inspectiedatum;
 
   if (Object.keys(backfill).length > 0) {
     await prisma.shipment.update({
