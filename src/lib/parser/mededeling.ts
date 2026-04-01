@@ -125,11 +125,17 @@ export function parseMededeling(text: string): MededelingData | null {
 
   let rawStatus = extractField(text, "Status van de aangifte") || "Documentcontrole";
 
-  // P2 code in bescheiden column means the shipment is released/approved,
-  // regardless of what the PDF status field says
+  // P2 code in bescheiden column means the shipment is released/cleared.
+  // The resulting status depends on the control type:
+  //   - Document control path → DOCUMENTCONTROLE_AFGEROND (completed)
+  //   - Physical inspection path → GOEDGEKEURD (approved)
   const deelIdx = text.indexOf("Deelzendingen");
   if (deelIdx !== -1 && /\bP2\s+\d/.test(text.substring(deelIdx))) {
-    rawStatus = "Goedgekeurd";
+    if (rawStatus.trim().toLowerCase().startsWith("documentcontrole")) {
+      rawStatus = "Documentcontrole afgerond";
+    } else {
+      rawStatus = "Goedgekeurd";
+    }
   }
 
   // "Fysieke inspectie" in a mededeling means the shipment was selected for
