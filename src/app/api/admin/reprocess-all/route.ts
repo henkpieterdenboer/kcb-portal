@@ -12,10 +12,19 @@ import { parseEmailBody } from "@/lib/parser";
  *
  * DELETE THIS ENDPOINT after use.
  */
+
+export const maxDuration = 300; // 5 min timeout for bulk processing
+
 export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as { role?: string })?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Allow auth via session (browser) or API key (CLI)
+  const apiKey = request.headers.get("X-API-Key");
+  if (apiKey && apiKey === process.env.INGEST_API_KEY) {
+    // OK — authenticated via API key
+  } else {
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user as { role?: string })?.role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
   }
 
   // Phase 1: Clear all derived state
