@@ -71,7 +71,7 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
       if (v) sp.set(k, v);
       else sp.delete(k);
     }
-    sp.set("page", "1");
+    if (!("page" in params)) sp.set("page", "1");
     router.push(`${basePath}?${sp.toString()}`);
   }
 
