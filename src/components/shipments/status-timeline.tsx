@@ -18,7 +18,7 @@ interface StatusTimelineProps {
 }
 
 export function StatusTimeline({ history, onViewEmail }: StatusTimelineProps) {
-  const emailSources = ["MEDEDELING", "INSPECTIERAPPORT", "BLOKKADERAPPORT"];
+  const emailSources = ["MEDEDELING", "INSPECTIERAPPORT", "BLOKKADERAPPORT", "PLANNING_EMAIL"];
 
   return (
     <div className="space-y-4">
