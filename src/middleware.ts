@@ -8,7 +8,7 @@ export default withAuth({
 
 export const config = {
   matcher: [
-    // Protect all routes except login, activate, reset-password, api/auth, api/ingest, and static files
-    "/((?!login|activate|reset-password|api/auth|api/ingest|_next/static|_next/image|favicon.ico|.*\\.webp$|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)",
+    // Protect all routes except login, activate, reset-password, api/auth, api/ingest, api/admin, and static files
+    "/((?!login|activate|reset-password|api/auth|api/ingest|api/admin|_next/static|_next/image|favicon.ico|.*\\.webp$|.*\\.png$|.*\\.jpg$|.*\\.svg$).*)",
   ],
 };
