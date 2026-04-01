@@ -576,6 +576,14 @@ export async function parseEmailBody(
     inspectiedatum = new Date(y, m, d, h, min);
   }
 
+  // Detect status from email body keywords
+  let emailStatus: import("@/types").ShipmentStatus = "AANGEMELD";
+  let statusDetail = "Planning email received";
+  if (/ingepland/i.test(text)) {
+    emailStatus = "INSPECTIE_GEPLAND";
+    statusDetail = "Inspection scheduled via planning email";
+  }
+
   const emailConnect = { emailIngestions: { connect: { id: emailIngestionId } } };
 
   // Upsert: create shipment if it doesn't exist yet (planning email before mededeling)
@@ -593,13 +601,13 @@ export async function parseEmailBody(
       landVanOorsprong: landVanOorsprong || undefined,
       transportNaarEU: transportNaarEU || undefined,
       inspectiedatum: inspectiedatum || undefined,
-      status: "AANGEMELD",
+      status: emailStatus,
       ...emailConnect,
     },
     update: {
       ...emailConnect,
     },
-    select: { id: true, awb: true, bol: true, exporteur: true, importeur: true,
+    select: { id: true, status: true, awb: true, bol: true, exporteur: true, importeur: true,
               landVanVerzending: true, landVanOorsprong: true, transportNaarEU: true,
               inspectiedatum: true },
   });
@@ -615,12 +623,32 @@ export async function parseEmailBody(
   if (transportNaarEU && !shipment.transportNaarEU) backfill.transportNaarEU = transportNaarEU;
   if (inspectiedatum && !shipment.inspectiedatum) backfill.inspectiedatum = inspectiedatum;
 
+  // Only advance status, never regress
+  const shouldAdvance = statusLevel(emailStatus) >= statusLevel(shipment.status) && shipment.status !== emailStatus;
+  if (shouldAdvance) backfill.status = emailStatus;
+
   if (Object.keys(backfill).length > 0) {
     await prisma.shipment.update({
       where: { id: shipment.id },
       data: backfill,
     });
   }
+
+  // Always record status history entry (dedup on emailIngestionId)
+  await prisma.statusHistory.deleteMany({
+    where: { shipmentId: shipment.id, emailIngestionId },
+  });
+  const timestamp = await getEmailTimestamp(emailIngestionId);
+  await prisma.statusHistory.create({
+    data: {
+      shipmentId: shipment.id,
+      status: emailStatus,
+      source: "PLANNING_EMAIL",
+      details: statusDetail,
+      emailIngestionId,
+      timestamp,
+    },
+  });
 
   return { type: "EMAIL_BODY", aangiftenummer, success: true };
 }
