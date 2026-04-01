@@ -24,7 +24,8 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { ArrowLeft, FileText, AlertTriangle, FlaskConical, Mail, Paperclip, FileDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, FileText, AlertTriangle, FlaskConical, Mail, Paperclip, FileDown, RotateCw } from "lucide-react";
 
 interface ShipmentDetail {
   id: string;
@@ -115,6 +116,7 @@ export default function ShipmentDetailPage() {
   const [emailSheet, setEmailSheet] = useState<EmailSheetDetail | null>(null);
   const [emailSheetOpen, setEmailSheetOpen] = useState(false);
   const [loadingEmail, setLoadingEmail] = useState(false);
+  const [reprocessing, setReprocessing] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -133,6 +135,22 @@ export default function ShipmentDetailPage() {
       setEmailSheet(await res.json());
     }
     setLoadingEmail(false);
+  }
+
+  async function handleReprocess(emailId: string) {
+    setReprocessing(true);
+    try {
+      const res = await fetch(`/api/email-ingestions/${emailId}/reprocess`, { method: "POST" });
+      if (res.ok) {
+        // Refresh both email detail and shipment data
+        await openEmailDetail(emailId);
+        const shipmentRes = await fetch(`/api/shipments/${params.id}`);
+        if (shipmentRes.ok) setShipment(await shipmentRes.json());
+      }
+    } catch {
+      // ignore
+    }
+    setReprocessing(false);
   }
 
   if (loading) {
@@ -471,6 +489,18 @@ export default function ShipmentDetailPage() {
                   <span className="font-medium">{emailSheet.subject || "-"}</span>
                 </div>
               </div>
+
+              {/* Reprocess button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleReprocess(emailSheet.id)}
+                disabled={reprocessing}
+                className="w-fit"
+              >
+                <RotateCw className={`h-3.5 w-3.5 mr-1.5 ${reprocessing ? "animate-spin" : ""}`} />
+                {reprocessing ? t("emailLog.reprocessing") : t("emailLog.reprocess")}
+              </Button>
 
               {/* Attachments */}
               {emailSheet.attachments.length > 0 && (
