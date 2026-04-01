@@ -30,7 +30,7 @@ function parseDutchDate(dateStr: string): Date | null {
   const match = dateStr.match(/(\d{2})-(\d{2})-(\d{4})/);
   if (!match) return null;
   const [, day, month, year] = match;
-  return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  return new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
 }
 
 export function parseMonster(text: string): MonsterData | null {

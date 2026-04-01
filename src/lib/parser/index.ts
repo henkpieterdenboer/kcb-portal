@@ -560,20 +560,38 @@ export async function parseEmailBody(
   const landVanOorsprong = extractBodyField("Land van oorsprong");
   const transportNaarEU = extractBodyField("Vluchtnummer/Bootnaam");
 
-  // Parse inspection date from "Aangevraagde inspectiedatum: 20260402" + optional time "0700"
+  // Parse inspection date: prefer confirmed time from subject, fall back to requested time from body.
+  // Subject format: "Planning: ...ingepland op: '02-04-2026 08:01'"
   let inspectiedatum: Date | null = null;
-  const inspDateRaw = extractBodyField("Aangevraagde inspectiedatum");
-  if (inspDateRaw && /^\d{8}$/.test(inspDateRaw)) {
-    const y = parseInt(inspDateRaw.substring(0, 4));
-    const m = parseInt(inspDateRaw.substring(4, 6)) - 1;
-    const d = parseInt(inspDateRaw.substring(6, 8));
-    const timeRaw = extractBodyField("Aangevraagde tijd");
-    let h = 0, min = 0;
-    if (timeRaw && /^\d{4}$/.test(timeRaw)) {
-      h = parseInt(timeRaw.substring(0, 2));
-      min = parseInt(timeRaw.substring(2, 4));
+  const emailRecord = await prisma.emailIngestion.findUnique({
+    where: { id: emailIngestionId },
+    select: { subject: true },
+  });
+  const subjectMatch = emailRecord?.subject?.match(/ingepland op:?\s*[&apos;'']?(\d{2})-(\d{2})-(\d{4})\s+(\d{2}):(\d{2})/i);
+  if (subjectMatch) {
+    // Confirmed time from subject
+    inspectiedatum = new Date(Date.UTC(
+      parseInt(subjectMatch[3]),
+      parseInt(subjectMatch[2]) - 1,
+      parseInt(subjectMatch[1]),
+      parseInt(subjectMatch[4]),
+      parseInt(subjectMatch[5])
+    ));
+  } else {
+    // Fall back to requested time from body
+    const inspDateRaw = extractBodyField("Aangevraagde inspectiedatum");
+    if (inspDateRaw && /^\d{8}$/.test(inspDateRaw)) {
+      const y = parseInt(inspDateRaw.substring(0, 4));
+      const m = parseInt(inspDateRaw.substring(4, 6)) - 1;
+      const d = parseInt(inspDateRaw.substring(6, 8));
+      const timeRaw = extractBodyField("Aangevraagde tijd");
+      let h = 0, min = 0;
+      if (timeRaw && /^\d{4}$/.test(timeRaw)) {
+        h = parseInt(timeRaw.substring(0, 2));
+        min = parseInt(timeRaw.substring(2, 4));
+      }
+      inspectiedatum = new Date(Date.UTC(y, m, d, h, min));
     }
-    inspectiedatum = new Date(y, m, d, h, min);
   }
 
   // Detect status from email body keywords
@@ -621,7 +639,12 @@ export async function parseEmailBody(
   if (landVanVerzending && !shipment.landVanVerzending) backfill.landVanVerzending = landVanVerzending;
   if (landVanOorsprong && !shipment.landVanOorsprong) backfill.landVanOorsprong = landVanOorsprong;
   if (transportNaarEU && !shipment.transportNaarEU) backfill.transportNaarEU = transportNaarEU;
-  if (inspectiedatum && !shipment.inspectiedatum) backfill.inspectiedatum = inspectiedatum;
+  // Planning email with confirmed time always overwrites (confirmed > requested)
+  if (inspectiedatum && subjectMatch) {
+    backfill.inspectiedatum = inspectiedatum;
+  } else if (inspectiedatum && !shipment.inspectiedatum) {
+    backfill.inspectiedatum = inspectiedatum;
+  }
 
   // Only advance status, never regress
   const shouldAdvance = statusLevel(emailStatus) >= statusLevel(shipment.status) && shipment.status !== emailStatus;
