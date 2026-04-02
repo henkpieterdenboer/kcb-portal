@@ -59,7 +59,11 @@ export default function LoginPage() {
 
       {/* Right: login form */}
       <div className="flex w-full items-center justify-center bg-gray-50 lg:w-1/2">
-        <Card className="w-full max-w-md mx-6">
+        <div className="w-full max-w-md mx-6 space-y-6">
+          <div className="flex justify-center">
+            <img src="/logo.png" alt="Coloriginz" className="h-12 w-auto" />
+          </div>
+        <Card>
           <CardHeader className="space-y-1 text-center lg:text-left">
             <CardTitle className="text-2xl font-bold">{t("auth.title")}</CardTitle>
             <p className="text-sm text-gray-500 lg:hidden">
@@ -118,6 +122,7 @@ export default function LoginPage() {
             )}
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );
