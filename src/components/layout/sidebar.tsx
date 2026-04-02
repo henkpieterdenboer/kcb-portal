@@ -129,9 +129,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
   return (
     <>
       <div className="flex h-full w-64 flex-col border-r bg-white">
-        <div className="flex flex-col items-start justify-center border-b px-6 py-3">
-          <img src="/logo.png" alt="Coloriginz" className="h-7 w-auto" />
-          <h1 className="text-sm font-semibold text-gray-500">{t("nav.appTitle")}</h1>
+        <div className="flex flex-col items-start justify-center border-b px-6 py-4">
+          <img src="/logo.png" alt="Coloriginz" className="h-8 w-auto" />
+          <h1 className="mt-1 pl-0.5 text-[13px] font-medium tracking-wide text-gray-400">{t("nav.appTitle")}</h1>
         </div>
 
         {/* Main navigation */}
