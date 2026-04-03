@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { StatusBadge } from "@/components/shipments/status-badge";
 import { ClipboardCheck } from "lucide-react";
 import { useTranslation } from "@/lib/i18n/context";
@@ -22,22 +24,35 @@ interface InspectionShipment {
 
 export function TodayInspections({ shipments }: { shipments: InspectionShipment[] }) {
   const { t } = useTranslation();
+  const [showDocControl, setShowDocControl] = useState(false);
+
+  const filtered = useMemo(() => {
+    if (showDocControl) return shipments;
+    return shipments.filter((s) => s.status !== "DOCUMENTCONTROLE");
+  }, [shipments, showDocControl]);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <ClipboardCheck className="h-4 w-4 text-violet-600" />
-          {t("dashboard.todayInspections")} ({shipments.length})
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ClipboardCheck className="h-4 w-4 text-violet-600" />
+            {t("dashboard.todayInspections")} ({filtered.length})
+          </CardTitle>
+          <label className="flex items-center gap-2 text-sm text-gray-500 cursor-pointer">
+            <Switch checked={showDocControl} onCheckedChange={setShowDocControl} />
+            {t("dashboard.showDocControl")}
+          </label>
+        </div>
       </CardHeader>
       <CardContent>
-        {shipments.length === 0 ? (
+        {filtered.length === 0 ? (
           <p className="py-4 text-center text-sm text-gray-500">
             {t("dashboard.noInspections")}
           </p>
         ) : (
           <div className="space-y-3">
-            {shipments.map((s) => {
+            {filtered.map((s) => {
               const report = s.inspectionReports[0];
               // Use tijdAanvang from report, or extract time from inspectiedatum
               let time = report?.tijdAanvang || null;
