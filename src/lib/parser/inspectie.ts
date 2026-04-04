@@ -57,9 +57,11 @@ function parseResultaten(text: string): InspectieResultaat[] {
   const section = text.substring(resultIdx);
   const statusValues = ["Goedgekeurd", "Wacht op vervolg", "Afgekeurd", "Geblokkeerd"];
 
-  // Entry regex: volgnummer + gewas (any 3+ uppercase letters) + country
-  // Handles both concatenated ("1ROSAKE...") and spaced ("1 ROSA KE ...") formats
-  const countryPattern = "KENIA|KENYA|ZIMBABWE|ECUADOR|COLOMBIA|ETHIOPIE|ETHIOPIA|KE|ZW|EC|CO|ET|NL";
+  // Entry regex: volgnummer + gewas (any 3+ uppercase letters) + country code/name
+  // Handles both concatenated ("1ROSAKE4620...") and spaced ("1 SOLIDAGO ZM 123700...") formats
+  // Country matching: known full names first, then any 2-letter ISO code followed by a digit
+  const knownCountries = "KENIA|KENYA|ZIMBABWE|ECUADOR|COLOMBIA|ETHIOPIE|ETHIOPIA|ZAMBIA|TANZANIA|UGANDA|ISRAEL|NEDERLAND";
+  const countryPattern = `(?:${knownCountries}|[A-Z]{2})(?=\\s*\\d)`;
   const entryRegex = new RegExp(
     `^(\\d+)\\s*([A-Z]{3,}?)\\s*(${countryPattern})`, "i"
   );
