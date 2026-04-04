@@ -317,6 +317,26 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
       });
     }
 
+    // Create subShipments from inspection resultaten if none exist yet
+    if (data.resultaten.length > 0) {
+      const existingSubs = await prisma.subShipment.count({ where: { shipmentId } });
+      if (existingSubs === 0) {
+        const uniqueGewassen = [...new Set(data.resultaten.map((r) => r.gewas))].filter((g) => g && g !== "UNKNOWN");
+        if (uniqueGewassen.length > 0) {
+          await prisma.subShipment.createMany({
+            data: uniqueGewassen.map((gewas) => {
+              const entry = data.resultaten.find((r) => r.gewas === gewas)!;
+              return {
+                shipmentId,
+                botanischeNaam: gewas,
+                landVanOorsprong: entry.oorsprong || data.landVanVertrek || null,
+              };
+            }),
+          });
+        }
+      }
+    }
+
     // Record status history for inspectie emails.
     // When resultaten couldn't be parsed, use the current shipment status instead.
     const historyStatus = newStatus || current?.status || "FYSIEKE_INSPECTIE";
