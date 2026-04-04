@@ -242,17 +242,22 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
     shipmentId = shipment.id;
   }
 
-  // Determine overall status from resultaten
-  let overallStatus = "Goedgekeurd";
+  // Determine overall status from resultaten.
+  // When resultaten is empty (parser couldn't extract table), we must NOT default
+  // to "Goedgekeurd" — that would incorrectly override a GEBLOKKEERD status.
+  let overallStatus: string | null = null;
   const resultatenJson = JSON.stringify(data.resultaten);
-  for (const r of data.resultaten) {
-    if (r.status === "Wacht op vervolg") {
-      overallStatus = "Wacht op vervolg";
-      break;
-    }
-    if (r.status === "Afgekeurd" || r.status === "Geblokkeerd") {
-      overallStatus = r.status;
-      break;
+  if (data.resultaten.length > 0) {
+    overallStatus = "Goedgekeurd";
+    for (const r of data.resultaten) {
+      if (r.status === "Wacht op vervolg") {
+        overallStatus = "Wacht op vervolg";
+        break;
+      }
+      if (r.status === "Afgekeurd" || r.status === "Geblokkeerd") {
+        overallStatus = r.status;
+        break;
+      }
     }
   }
 
@@ -292,12 +297,12 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
 
   // Update shipment status (only advance, never regress) and fill in AWB/BOL if missing
   if (shipmentId) {
-    const newStatus = normalizeStatus(overallStatus);
     const current = await prisma.shipment.findUnique({ where: { id: shipmentId }, select: { awb: true, bol: true, status: true } });
     const shipmentUpdateData: Record<string, unknown> = {};
 
-    // Only advance status, never regress
-    const shouldAdvance = current && statusLevel(newStatus) >= statusLevel(current.status) && current.status !== newStatus;
+    // Only update status if we could parse resultaten
+    const newStatus = overallStatus ? normalizeStatus(overallStatus) : null;
+    const shouldAdvance = newStatus && current && statusLevel(newStatus) >= statusLevel(current.status) && current.status !== newStatus;
     if (shouldAdvance) {
       shipmentUpdateData.status = newStatus;
     }
@@ -312,8 +317,13 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
       });
     }
 
-    // Always record status history for inspectie emails (definitive result).
-    // On reprocess: replace old entry for this email.
+    // Record status history for inspectie emails.
+    // When resultaten couldn't be parsed, use the current shipment status instead.
+    const historyStatus = newStatus || current?.status || "FYSIEKE_INSPECTIE";
+    const historyDetail = overallStatus
+      ? `Inspection report ${data.rapportnummer}: ${overallStatus}`
+      : `Inspection report ${data.rapportnummer}: results could not be parsed`;
+
     if (emailIngestionId) {
       await prisma.statusHistory.deleteMany({
         where: { shipmentId, emailIngestionId },
@@ -322,9 +332,9 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
       await prisma.statusHistory.create({
         data: {
           shipmentId,
-          status: newStatus,
+          status: historyStatus,
           source: "INSPECTIERAPPORT",
-          details: `Inspection report ${data.rapportnummer}: ${overallStatus}`,
+          details: historyDetail,
           emailIngestionId,
           timestamp,
         },
@@ -335,13 +345,13 @@ async function processInspectie(text: string, emailIngestionId?: string): Promis
         orderBy: { timestamp: "desc" },
         select: { status: true },
       });
-      if (!lastHistory || lastHistory.status !== newStatus) {
+      if (!lastHistory || lastHistory.status !== historyStatus) {
         await prisma.statusHistory.create({
           data: {
             shipmentId,
-            status: newStatus,
+            status: historyStatus,
             source: "INSPECTIERAPPORT",
-            details: `Inspection report ${data.rapportnummer}: ${overallStatus}`,
+            details: historyDetail,
             timestamp: new Date(),
           },
         });
