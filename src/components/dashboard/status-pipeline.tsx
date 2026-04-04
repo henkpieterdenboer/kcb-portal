@@ -29,6 +29,7 @@ const pipelineStatuses = [
   "INSPECTIE_AANGEVRAAGD",
   "INSPECTIE_GEPLAND",
   "FYSIEKE_INSPECTIE",
+  "WACHT_OP_VERVOLG",
   "DOCUMENTCONTROLE",
 ] as const;
 
@@ -37,12 +38,12 @@ const inspectionSubStatuses = new Set([
   "INSPECTIE_AANGEVRAAGD",
   "INSPECTIE_GEPLAND",
   "FYSIEKE_INSPECTIE",
+  "WACHT_OP_VERVOLG",
 ]);
 
 const terminalStatuses = [
   "GOEDGEKEURD",
   "DOCUMENTCONTROLE_AFGEROND",
-  "WACHT_OP_VERVOLG",
   "GEBLOKKEERD",
 ] as const;
 

@@ -128,7 +128,7 @@ export default function DashboardPage() {
         todayArrivals={data.todayArrivals.length}
         todayInspections={data.todayInspections.length}
         activeShipments={data.activeTotals.total}
-        blocked={data.totals.GEBLOKKEERD || 0}
+        blocked={(data.totals.GEBLOKKEERD || 0) + (data.totals.WACHT_OP_VERVOLG || 0)}
       />
 
       {/* Today's sections */}

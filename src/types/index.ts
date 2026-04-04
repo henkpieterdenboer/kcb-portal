@@ -36,7 +36,7 @@ export const STATUS_COLORS: Record<ShipmentStatus, string> = {
   GEBLOKKEERD: "bg-red-100 text-red-800",
 };
 
-export const TERMINAL_STATUSES: ShipmentStatus[] = ["GOEDGEKEURD", "DOCUMENTCONTROLE_AFGEROND", "WACHT_OP_VERVOLG", "GEBLOKKEERD"];
+export const TERMINAL_STATUSES: ShipmentStatus[] = ["GOEDGEKEURD", "DOCUMENTCONTROLE_AFGEROND", "GEBLOKKEERD"];
 export const ACTIVE_STATUSES = SHIPMENT_STATUSES.filter(
   (s) => !(TERMINAL_STATUSES as string[]).includes(s)
 );
