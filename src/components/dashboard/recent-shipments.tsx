@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -32,6 +33,7 @@ interface RecentShipmentsProps {
 
 export function RecentShipments({ shipments, statusFilter }: RecentShipmentsProps) {
   const { t } = useTranslation();
+  const router = useRouter();
   const [showDocControl, setShowDocControl] = useState(false);
 
   const filtered = useMemo(() => {
@@ -103,11 +105,15 @@ export function RecentShipments({ shipments, statusFilter }: RecentShipmentsProp
           </TableHeader>
           <TableBody>
             {filtered.map((s) => (
-              <TableRow key={s.id} className="cursor-pointer hover:bg-gray-50">
+              <TableRow
+                key={s.id}
+                className="cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                onClick={() => router.push(`/shipments/${s.id}`)}
+              >
                 <TableCell>
-                  <Link href={`/shipments/${s.id}`} className="font-mono text-sm font-medium text-blue-600 hover:underline">
+                  <span className="font-mono text-sm font-medium text-blue-600">
                     {s.awb || s.aangiftenummer}
-                  </Link>
+                  </span>
                 </TableCell>
                 <TableCell className="max-w-[180px] truncate">{s.exporteur || "-"}</TableCell>
                 <TableCell className="max-w-[200px] truncate">
