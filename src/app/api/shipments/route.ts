@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid query parameters" }, { status: 400 });
   }
 
-  const { status, dateFrom, dateTo, search, archived, page, pageSize } = query.data;
+  const { status, dateFrom, dateTo, search, archived, sortBy, sortOrder, page, pageSize } = query.data;
 
   const where: Record<string, unknown> = {};
 
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: { updatedAt: "desc" },
+      orderBy: { [sortBy]: sortOrder },
       skip: (page - 1) * pageSize,
       take: pageSize,
     }),

@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "./status-badge";
 import { SHIPMENT_STATUSES, ACTIVE_STATUSES, TERMINAL_STATUSES } from "@/types";
-import { Search } from "lucide-react";
+import { Search, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 
 interface ShipmentRow {
   id: string;
@@ -64,6 +64,24 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
     : mode === "active"
       ? ACTIVE_STATUSES
       : SHIPMENT_STATUSES;
+
+  const currentSortBy = searchParams.get("sortBy") || "updatedAt";
+  const currentSortOrder = searchParams.get("sortOrder") || "desc";
+
+  function toggleSort(column: string) {
+    if (currentSortBy === column) {
+      applyFilters({ sortBy: column, sortOrder: currentSortOrder === "asc" ? "desc" : "asc" });
+    } else {
+      applyFilters({ sortBy: column, sortOrder: "asc" });
+    }
+  }
+
+  function SortIcon({ column }: { column: string }) {
+    if (currentSortBy !== column) return <ArrowUpDown className="ml-1 inline h-3.5 w-3.5 text-gray-400" />;
+    return currentSortOrder === "asc"
+      ? <ArrowUp className="ml-1 inline h-3.5 w-3.5" />
+      : <ArrowDown className="ml-1 inline h-3.5 w-3.5" />;
+  }
 
   function applyFilters(params: Record<string, string>) {
     const sp = new URLSearchParams(searchParams.toString());
@@ -154,24 +172,35 @@ export function ShipmentTable({ shipments, pagination, mode }: ShipmentTableProp
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t("table.awb")}</TableHead>
-              <TableHead>{t("table.exporter")}</TableHead>
+              <TableHead className="cursor-pointer select-none hover:bg-gray-50" onClick={() => toggleSort("awb")}>
+                {t("table.awb")}<SortIcon column="awb" />
+              </TableHead>
+              <TableHead className="cursor-pointer select-none hover:bg-gray-50" onClick={() => toggleSort("exporteur")}>
+                {t("table.exporter")}<SortIcon column="exporteur" />
+              </TableHead>
               <TableHead>{t("table.product")}</TableHead>
-              <TableHead>{t("table.origin")}</TableHead>
-              <TableHead>{t("table.status")}</TableHead>
-              <TableHead>{t("table.updated")}</TableHead>
+              <TableHead className="cursor-pointer select-none hover:bg-gray-50" onClick={() => toggleSort("landVanOorsprong")}>
+                {t("table.origin")}<SortIcon column="landVanOorsprong" />
+              </TableHead>
+              <TableHead className="cursor-pointer select-none hover:bg-gray-50" onClick={() => toggleSort("status")}>
+                {t("table.status")}<SortIcon column="status" />
+              </TableHead>
+              <TableHead className="cursor-pointer select-none hover:bg-gray-50" onClick={() => toggleSort("updatedAt")}>
+                {t("table.updated")}<SortIcon column="updatedAt" />
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {shipments.map((s) => (
-              <TableRow key={s.id} className="cursor-pointer hover:bg-gray-50">
+              <TableRow
+                key={s.id}
+                className="cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                onClick={() => router.push(`/shipments/${s.id}`)}
+              >
                 <TableCell>
-                  <Link
-                    href={`/shipments/${s.id}`}
-                    className="font-mono text-sm font-medium text-blue-600 hover:underline"
-                  >
+                  <span className="font-mono text-sm font-medium text-blue-600">
                     {s.awb || s.aangiftenummer}
-                  </Link>
+                  </span>
                 </TableCell>
                 <TableCell className="max-w-[180px] truncate">
                   {s.exporteur || "-"}
