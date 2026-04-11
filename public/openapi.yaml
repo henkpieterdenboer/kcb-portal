@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: KCB External API
   version: 1.0.0
@@ -192,15 +192,13 @@ components:
           description: Human-readable status label in English.
           example: "Physical Inspection"
         exporteur:
-          type:
-            - string
-            - "null"
+          type: string
+          nullable: true
           description: Name of the exporter.
           example: "Some Exporter Ltd"
         landVanOorsprong:
-          type:
-            - string
-            - "null"
+          type: string
+          nullable: true
           description: Country of origin.
           example: "KENIA"
         updatedAt:
