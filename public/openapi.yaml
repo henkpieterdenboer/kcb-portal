@@ -21,9 +21,9 @@ info:
     with a `Retry-After` header.
 
 servers:
-  - url: https://kcb.vercel.app
+  - url: https://kcb-portal.apps.coloriginz.com
     description: Production
-  - url: https://kcb-test.vercel.app
+  - url: https://kcb-portal.test.apps.coloriginz.com
     description: Test
 
 security:
