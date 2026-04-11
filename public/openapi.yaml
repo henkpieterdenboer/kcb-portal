@@ -1,0 +1,224 @@
+openapi: 3.1.0
+info:
+  title: KCB External API
+  version: 1.0.0
+  description: |
+    External API for the KCB (Kwaliteitscontrole Bureau) shipment management system.
+
+    This API allows authorized external parties to look up airway bill (AWB) information
+    and check whether a shipment exists in the KCB system.
+
+    ## Authentication
+
+    All requests require an API key passed via the `X-API-Key` header.
+    Contact KCB to obtain your key.
+
+    ## Rate Limiting
+
+    Requests are limited to **60 per minute** per API key.
+    The `X-RateLimit-Remaining` response header indicates how many requests you have left
+    in the current window. If you exceed the limit, you will receive a `429` response
+    with a `Retry-After` header.
+
+servers:
+  - url: https://kcb.vercel.app
+    description: Production
+  - url: https://kcb-test.vercel.app
+    description: Test
+
+security:
+  - apiKey: []
+
+paths:
+  /api/external/awb/{awb}:
+    get:
+      operationId: lookupAwb
+      summary: Look up shipments by AWB
+      description: |
+        Returns all shipments associated with the given airway bill number.
+
+        This endpoint always returns `200` for valid requests, even if no shipments
+        are found. A missing AWB is not an error — the response simply indicates
+        `"exists": false` with an empty shipments array.
+      parameters:
+        - name: awb
+          in: path
+          required: true
+          description: The airway bill number to look up (e.g. `057-12345678`).
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 50
+          example: "057-12345678"
+        - name: X-API-Key
+          in: header
+          required: true
+          description: Your API key.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lookup successful. Check `exists` to determine if the AWB was found.
+          headers:
+            X-RateLimit-Remaining:
+              description: Number of requests remaining in the current rate limit window.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AwbLookupResponse"
+              examples:
+                found:
+                  summary: AWB found (2 shipments)
+                  value:
+                    awb: "057-12345678"
+                    exists: true
+                    count: 2
+                    shipments:
+                      - aangiftenummer: "NL813909867.002600023184"
+                        status: "FYSIEKE_INSPECTIE"
+                        statusLabel: "Physical Inspection"
+                        exporteur: "Some Exporter Ltd"
+                        landVanOorsprong: "KENIA"
+                        updatedAt: "2026-04-10T14:30:00.000Z"
+                        url: "https://kcb.vercel.app/shipments/743f30bf-bceb-44ce-8c88-d77ab4cc3622"
+                      - aangiftenummer: "NL813909867.002600023183"
+                        status: "GOEDGEKEURD"
+                        statusLabel: "Approved"
+                        exporteur: "Some Exporter Ltd"
+                        landVanOorsprong: "KENIA"
+                        updatedAt: "2026-04-09T10:15:00.000Z"
+                        url: "https://kcb.vercel.app/shipments/bef6b5ca-eed1-4519-8379-3c1cb3a24a40"
+                notFound:
+                  summary: AWB not found
+                  value:
+                    awb: "000-00000000"
+                    exists: false
+                    count: 0
+                    shipments: []
+        "400":
+          description: AWB parameter is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Invalid AWB parameter"
+        "401":
+          description: API key is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Unauthorized"
+        "429":
+          description: Rate limit exceeded. Wait and retry.
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
+              example: 60
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Rate limit exceeded"
+
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    AwbLookupResponse:
+      type: object
+      required:
+        - awb
+        - exists
+        - count
+        - shipments
+      properties:
+        awb:
+          type: string
+          description: The AWB number that was looked up.
+          example: "057-12345678"
+        exists:
+          type: boolean
+          description: Whether any shipments were found for this AWB.
+        count:
+          type: integer
+          description: Number of shipments found.
+          example: 2
+        shipments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Shipment"
+
+    Shipment:
+      type: object
+      required:
+        - aangiftenummer
+        - status
+        - statusLabel
+        - updatedAt
+        - url
+      properties:
+        aangiftenummer:
+          type: string
+          description: The customs declaration number.
+          example: "NL813909867.002600023184"
+        status:
+          type: string
+          description: Internal status code.
+          enum:
+            - AANGEMELD
+            - INSPECTIE_AANGEVRAAGD
+            - INSPECTIE_GEPLAND
+            - DOCUMENTCONTROLE
+            - DOCUMENTCONTROLE_AFGEROND
+            - FYSIEKE_INSPECTIE
+            - GOEDGEKEURD
+            - WACHT_OP_VERVOLG
+            - GEBLOKKEERD
+          example: "FYSIEKE_INSPECTIE"
+        statusLabel:
+          type: string
+          description: Human-readable status label in English.
+          example: "Physical Inspection"
+        exporteur:
+          type:
+            - string
+            - "null"
+          description: Name of the exporter.
+          example: "Some Exporter Ltd"
+        landVanOorsprong:
+          type:
+            - string
+            - "null"
+          description: Country of origin.
+          example: "KENIA"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp (ISO 8601).
+          example: "2026-04-10T14:30:00.000Z"
+        url:
+          type: string
+          format: uri
+          description: Direct link to the shipment detail page in KCB.
+          example: "https://kcb.vercel.app/shipments/743f30bf-bceb-44ce-8c88-d77ab4cc3622"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message.

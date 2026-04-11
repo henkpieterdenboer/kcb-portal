@@ -23,6 +23,8 @@ export const shipmentsQuerySchema = z.object({
   dateTo: z.string().optional(),
   search: z.string().optional(),
   archived: z.enum(["true", "false", "all"]).optional().default("false"),
+  sortBy: z.enum(["awb", "exporteur", "landVanOorsprong", "status", "updatedAt"]).optional().default("updatedAt"),
+  sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
   page: z.coerce.number().optional().default(1),
   pageSize: z.coerce.number().optional().default(20),
 });
@@ -61,4 +63,8 @@ export const activateAccountSchema = z.object({
 export const resetPasswordSchema = z.object({
   token: z.string().min(1, "Token is required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+export const awbLookupParamSchema = z.object({
+  awb: z.string().min(1).max(50),
 });
