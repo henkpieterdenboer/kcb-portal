@@ -59,6 +59,7 @@ export async function GET(
     awb: awbValue,
     exists: shipments.length > 0,
     count: shipments.length,
+    url: `${appUrl}/shipments?search=${encodeURIComponent(awbValue)}`,
     shipments: shipments.map((s) => ({
       aangiftenummer: s.aangiftenummer,
       status: s.status,

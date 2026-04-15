@@ -75,6 +75,7 @@ paths:
                     awb: "057-12345678"
                     exists: true
                     count: 2
+                    url: "https://kcb-portal.apps.coloriginz.com/shipments?search=057-12345678"
                     shipments:
                       - aangiftenummer: "NL813909867.002600023184"
                         status: "FYSIEKE_INSPECTIE"
@@ -82,20 +83,21 @@ paths:
                         exporteur: "Some Exporter Ltd"
                         landVanOorsprong: "KENIA"
                         updatedAt: "2026-04-10T14:30:00.000Z"
-                        url: "https://kcb.vercel.app/shipments/743f30bf-bceb-44ce-8c88-d77ab4cc3622"
+                        url: "https://kcb-portal.apps.coloriginz.com/shipments/743f30bf-bceb-44ce-8c88-d77ab4cc3622"
                       - aangiftenummer: "NL813909867.002600023183"
                         status: "GOEDGEKEURD"
                         statusLabel: "Approved"
                         exporteur: "Some Exporter Ltd"
                         landVanOorsprong: "KENIA"
                         updatedAt: "2026-04-09T10:15:00.000Z"
-                        url: "https://kcb.vercel.app/shipments/bef6b5ca-eed1-4519-8379-3c1cb3a24a40"
+                        url: "https://kcb-portal.apps.coloriginz.com/shipments/bef6b5ca-eed1-4519-8379-3c1cb3a24a40"
                 notFound:
                   summary: AWB not found
                   value:
                     awb: "000-00000000"
                     exists: false
                     count: 0
+                    url: "https://kcb-portal.apps.coloriginz.com/shipments?search=000-00000000"
                     shipments: []
         "400":
           description: AWB parameter is missing or invalid.
@@ -142,6 +144,7 @@ components:
         - awb
         - exists
         - count
+        - url
         - shipments
       properties:
         awb:
@@ -155,6 +158,11 @@ components:
           type: integer
           description: Number of shipments found.
           example: 2
+        url:
+          type: string
+          format: uri
+          description: Link to the shipments overview page filtered by this AWB.
+          example: "https://kcb-portal.apps.coloriginz.com/shipments?search=057-12345678"
         shipments:
           type: array
           items:
@@ -210,7 +218,7 @@ components:
           type: string
           format: uri
           description: Direct link to the shipment detail page in KCB.
-          example: "https://kcb.vercel.app/shipments/743f30bf-bceb-44ce-8c88-d77ab4cc3622"
+          example: "https://kcb-portal.apps.coloriginz.com/shipments/743f30bf-bceb-44ce-8c88-d77ab4cc3622"
 
     Error:
       type: object
